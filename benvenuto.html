@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Benvenuto in MotorSage</title>
+<!--
+  Pagina di benvenuto per chi riceve un invito: dice come scaricare l'app e
+  come entrare. Statica: niente cookie, statistiche o dati personali, e il
+  carattere (Manrope) è nella cartella fonts/ accanto alla pagina, quindi
+  nessuna richiesta a Google. Le uniche terze parti contattate sono GitHub
+  (l'API pubblica che dice qual è l'ultima versione definitiva e da cui si
+  scaricano i file Android e Mac) e jsDelivr (lo script che disegna il codice
+  QR, solo da computer). Se GitHub non risponde, resta il collegamento alla
+  pagina delle versioni.
+  Lingua: ?lingua=it|en|de|pl|el, altrimenti quella del browser, altrimenti
+  italiano.
+-->
+<style>
+  /* Carattere ospitato qui (licenza OFL, vedi fonts/OFL.txt). */
+  @font-face { font-family: "Manrope"; font-weight: 400; font-style: normal; font-display: swap; src: url("fonts/Manrope-Regular.ttf") format("truetype"); }
+  @font-face { font-family: "Manrope"; font-weight: 600; font-style: normal; font-display: swap; src: url("fonts/Manrope-SemiBold.ttf") format("truetype"); }
+  @font-face { font-family: "Manrope"; font-weight: 700; font-style: normal; font-display: swap; src: url("fonts/Manrope-Bold.ttf") format("truetype"); }
+  :root {
+    color-scheme: light dark;
+    --primario: #1F6FEB;
+    --pulsante: #1F6FEB;
+    --sfondo: #f5f8fe;
+    --scheda: #ffffff;
+    --testo: #14213d;
+    --testo-2: #56627a;
+    --bordo: #dbe4f3;
+    --evidenza: #eaf2ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --primario: #4a8dff;
+      --sfondo: #0e1524;
+      --scheda: #172036;
+      --testo: #eef3fc;
+      --testo-2: #a3b0c8;
+      --bordo: #283454;
+      --evidenza: #1a2a4d;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 32px 16px 48px; background: var(--sfondo); color: var(--testo);
+    font-family: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5; overflow-wrap: anywhere;
+  }
+  main { max-width: 460px; margin: 0 auto; }
+  header { text-align: center; margin-bottom: 28px; }
+  .marchio { width: 112px; height: auto; display: block; margin: 0 auto 12px; }
+  h1 { font-size: 1.7rem; font-weight: 700; margin: 0 0 6px; line-height: 1.2; }
+  .sottotitolo { margin: 0; color: var(--testo-2); }
+  h2 {
+    font-size: .85rem; font-weight: 700; letter-spacing: .04em;
+    text-transform: uppercase; color: var(--testo-2); margin: 0 0 12px;
+  }
+  section { margin-bottom: 28px; }
+  .scheda {
+    background: var(--scheda); border: 1px solid var(--bordo);
+    border-radius: 16px; padding: 16px; margin-bottom: 12px;
+  }
+  .scheda.evidenza { border: 2px solid var(--primario); background: var(--evidenza); padding: 15px; }
+  .scheda h3 { font-size: 1.05rem; font-weight: 700; margin: 0; }
+  .testata { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .badge {
+    background: var(--pulsante); color: #fff; font-size: .75rem; font-weight: 700;
+    padding: 3px 10px; border-radius: 999px;
+  }
+  .pulsante {
+    display: block; margin-top: 12px; padding: 14px 16px; border-radius: 12px;
+    background: var(--pulsante); color: #fff; font-weight: 700; text-align: center;
+    text-decoration: none;
+  }
+  .pulsante:focus-visible, .ripiego a:focus-visible { outline: 3px solid var(--testo); outline-offset: 2px; }
+  .nota { margin: 10px 0 0; font-size: .92rem; color: var(--testo-2); }
+  .in-arrivo { margin: 6px 0 0; font-weight: 600; color: var(--testo-2); }
+  .stato { text-align: center; color: var(--testo-2); }
+  .ripiego a { color: var(--primario); font-weight: 700; }
+  .qr { text-align: center; }
+  .qr .codice { width: 176px; height: 176px; margin: 0 auto 10px; border-radius: 8px; overflow: hidden; background: #fff; }
+  .qr .codice svg { display: block; width: 100%; height: 100%; }
+  .qr p { margin: 0; color: var(--testo-2); }
+  .manca { margin: 12px 0 0; }
+  .manca span { color: var(--testo-2); }
+  .manca a { color: var(--primario); font-weight: 700; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <noscript>
+    <p class="stato">Per scaricare l'app apri la pagina delle versioni. / To download the app, open the releases page.<br>
+    <a href="https://github.com/P3LabAdmin/parco-veicoli-versioni/releases/latest" style="color:var(--primario);font-weight:700">github.com/P3LabAdmin/parco-veicoli-versioni</a></p>
+  </noscript>
+  <header>
+    <picture>
+      <source srcset="marchio_scuro.png" media="(prefers-color-scheme: dark)">
+      <img class="marchio" src="marchio.png" alt="MotorSage" width="168" height="128">
+    </picture>
+    <h1 data-t="titolo">Benvenuto in MotorSage</h1>
+    <p class="sottotitolo" data-t="sottotitolo">Scadenze, spese e consumi dei tuoi veicoli</p>
+  </header>
+
+  <section aria-labelledby="passo1">
+    <h2 id="passo1" data-t="passo1">Passo 1 · Scarica l'app</h2>
+    <p id="stato" class="stato" aria-live="polite" data-t="cerco">Cerco l'ultima versione…</p>
+    <div id="schede">
+      <div class="scheda" id="scheda-android" data-sistema="android" hidden>
+        <div class="testata"><h3>Android</h3><span class="badge" data-t="tuo" hidden>il tuo dispositivo</span></div>
+        <a class="pulsante" id="scarica-android" href="#" data-t="scaricaAndroid">Scarica per Android</a>
+        <p class="nota" data-t="notaAndroid">Consenti l'installazione da questa fonte. Se Play Protect avvisa, scegli «Installa comunque».</p>
+        <p class="manca ripiego" hidden>
+          <span data-t="nonDisponibile">Questo file non è disponibile al momento.</span><br>
+          <a href="https://github.com/P3LabAdmin/parco-veicoli-versioni/releases/latest" data-t="apriVersioni">Apri la pagina delle versioni</a>
+        </p>
+      </div>
+      <div class="scheda" id="scheda-mac" data-sistema="mac" hidden>
+        <div class="testata"><h3>Mac</h3><span class="badge" data-t="tuo" hidden>il tuo dispositivo</span></div>
+        <a class="pulsante" id="scarica-mac" href="#" data-t="scaricaMac">Scarica per Mac</a>
+        <p class="nota" data-t="notaMac">Apri il file scaricato e trascina MotorSage in Applicazioni. Se il Mac la blocca alla prima apertura: Impostazioni di Sistema → Privacy e sicurezza → «Apri comunque».</p>
+        <p class="manca ripiego" hidden>
+          <span data-t="nonDisponibile">Questo file non è disponibile al momento.</span><br>
+          <a href="https://github.com/P3LabAdmin/parco-veicoli-versioni/releases/latest" data-t="apriVersioni">Apri la pagina delle versioni</a>
+        </p>
+      </div>
+      <div class="scheda" id="scheda-ios" data-sistema="ios" hidden>
+        <div class="testata"><h3 data-t="ios">iPhone e iPad</h3><span class="badge" data-t="tuo" hidden>il tuo dispositivo</span></div>
+        <p class="in-arrivo" data-t="inArrivo">In arrivo</p>
+      </div>
+    </div>
+    <p id="ripiego" class="ripiego stato" hidden>
+      <span data-t="ripiego">Non riesco a leggere le versioni disponibili.</span><br>
+      <a href="https://github.com/P3LabAdmin/parco-veicoli-versioni/releases/latest" data-t="apriVersioni">Apri la pagina delle versioni</a>
+    </p>
+  </section>
+
+  <!-- Solo da un computer: il codice QR della pagina stessa, per aprirla sul telefono. -->
+  <section id="qr" class="scheda qr" hidden>
+    <div class="codice" id="qr-codice" aria-hidden="true"></div>
+    <p data-t="qr">Vuoi l'app sul telefono? Inquadra questo codice.</p>
+  </section>
+
+  <section aria-labelledby="passo2">
+    <h2 id="passo2" data-t="passo2">Passo 2 · Entra</h2>
+    <div class="scheda">
+      <p style="margin:0" data-t="passo2Testo">Apri MotorSage, tocca «Ho ricevuto un invito» e scrivi l'indirizzo email a cui hai ricevuto l'invito. Ti arriverà un codice di 6 cifre.</p>
+    </div>
+  </section>
+</main>
+
+<!-- Generatore di codici QR (versione fissata e verificata con l'impronta). -->
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"
+        integrity="sha384-8FWZA6BGMXhsfO+BLtrJK0We6gg5o1JyO8xQm6peWDEUs17ACA5ziE/NIAkl9z2k"
+        crossorigin="anonymous"></script>
+<script>
+  const URL_RILASCIO = 'https://api.github.com/repos/P3LabAdmin/parco-veicoli-versioni/releases/latest';
+
+  // {v} è il numero di versione (se non si conosce, la parte « · {v}» cade).
+  const TESTI = {
+    it: {
+      nonDisponibile: 'Questo file non è disponibile al momento.',
+      titolo: 'Benvenuto in MotorSage',
+      sottotitolo: 'Scadenze, spese e consumi dei tuoi veicoli',
+      passo1: 'Passo 1 · Scarica l\'app',
+      cerco: 'Cerco l\'ultima versione…',
+      tuo: 'il tuo dispositivo',
+      scaricaAndroid: 'Scarica per Android · {v}',
+      scaricaMac: 'Scarica per Mac',
+      ios: 'iPhone e iPad',
+      inArrivo: 'In arrivo',
+      notaAndroid: 'Consenti l\'installazione da questa fonte. Se Play Protect avvisa, scegli «Installa comunque».',
+      notaMac: 'Apri il file scaricato e trascina MotorSage in Applicazioni. Se il Mac la blocca alla prima apertura: Impostazioni di Sistema → Privacy e sicurezza → «Apri comunque».',
+      qr: 'Vuoi l\'app sul telefono? Inquadra questo codice.',
+      passo2: 'Passo 2 · Entra',
+      passo2Testo: 'Apri MotorSage, tocca «Ho ricevuto un invito» e scrivi l\'indirizzo email a cui hai ricevuto l\'invito. Ti arriverà un codice di 6 cifre.',
+      ripiego: 'Non riesco a leggere le versioni disponibili.',
+      apriVersioni: 'Apri la pagina delle versioni',
+    },
+    en: {
+      nonDisponibile: 'This file is not available right now.',
+      titolo: 'Welcome to MotorSage',
+      sottotitolo: 'Deadlines, expenses and consumption of your vehicles',
+      passo1: 'Step 1 · Download the app',
+      cerco: 'Looking for the latest version…',
+      tuo: 'your device',
+      scaricaAndroid: 'Download for Android · {v}',
+      scaricaMac: 'Download for Mac',
+      ios: 'iPhone and iPad',
+      inArrivo: 'Coming soon',
+      notaAndroid: 'Allow installation from this source. If Play Protect warns you, choose “Install anyway”.',
+      notaMac: 'Open the downloaded file and drag MotorSage into Applications. If your Mac blocks it the first time you open it: System Settings → Privacy & Security → “Open Anyway”.',
+      qr: 'Want the app on your phone? Scan this code.',
+      passo2: 'Step 2 · Sign in',
+      passo2Testo: 'Open MotorSage, tap “I received an invitation” and enter the email address where you received the invitation. You will get a 6-digit code.',
+      ripiego: 'I couldn\'t read the available versions.',
+      apriVersioni: 'Open the releases page',
+    },
+    de: {
+      nonDisponibile: 'Diese Datei ist im Moment nicht verfügbar.',
+      titolo: 'Willkommen bei MotorSage',
+      sottotitolo: 'Fristen, Ausgaben und Verbrauch deiner Fahrzeuge',
+      passo1: 'Schritt 1 · App herunterladen',
+      cerco: 'Suche die neueste Version…',
+      tuo: 'dein Gerät',
+      scaricaAndroid: 'Für Android herunterladen · {v}',
+      scaricaMac: 'Für Mac herunterladen',
+      ios: 'iPhone und iPad',
+      inArrivo: 'Demnächst',
+      notaAndroid: 'Erlaube die Installation aus dieser Quelle. Wenn Play Protect warnt, wähle „Trotzdem installieren“.',
+      notaMac: 'Öffne die heruntergeladene Datei und ziehe MotorSage in „Programme“. Wenn dein Mac die App beim ersten Öffnen blockiert: Systemeinstellungen → Datenschutz & Sicherheit → „Trotzdem öffnen“.',
+      qr: 'Du möchtest die App auf dem Handy? Scanne diesen Code.',
+      passo2: 'Schritt 2 · Anmelden',
+      passo2Testo: 'Öffne MotorSage, tippe auf „Ich habe eine Einladung erhalten“ und gib die E-Mail-Adresse ein, an die die Einladung gegangen ist. Du bekommst einen 6-stelligen Code.',
+      ripiego: 'Die verfügbaren Versionen konnten nicht gelesen werden.',
+      apriVersioni: 'Seite mit den Versionen öffnen',
+    },
+    pl: {
+      nonDisponibile: 'Ten plik jest obecnie niedostępny.',
+      titolo: 'Witaj w MotorSage',
+      sottotitolo: 'Terminy, wydatki i zużycie Twoich pojazdów',
+      passo1: 'Krok 1 · Pobierz aplikację',
+      cerco: 'Szukam najnowszej wersji…',
+      tuo: 'Twoje urządzenie',
+      scaricaAndroid: 'Pobierz na Androida · {v}',
+      scaricaMac: 'Pobierz na Maca',
+      ios: 'iPhone i iPad',
+      inArrivo: 'Wkrótce',
+      notaAndroid: 'Zezwól na instalację z tego źródła. Jeśli Play Protect ostrzeże, wybierz „Zainstaluj mimo to”.',
+      notaMac: 'Otwórz pobrany plik i przeciągnij MotorSage do Programów. Jeśli Mac zablokuje aplikację przy pierwszym otwarciu: Ustawienia systemowe → Prywatność i ochrona → „Otwórz mimo to”.',
+      qr: 'Chcesz mieć aplikację w telefonie? Zeskanuj ten kod.',
+      passo2: 'Krok 2 · Zaloguj się',
+      passo2Testo: 'Otwórz MotorSage, dotknij „Otrzymałem zaproszenie” i wpisz adres e-mail, na który przyszło zaproszenie. Otrzymasz 6-cyfrowy kod.',
+      ripiego: 'Nie udało się odczytać dostępnych wersji.',
+      apriVersioni: 'Otwórz stronę z wersjami',
+    },
+    el: {
+      nonDisponibile: 'Αυτό το αρχείο δεν είναι διαθέσιμο αυτή τη στιγμή.',
+      titolo: 'Καλώς ήρθες στο MotorSage',
+      sottotitolo: 'Προθεσμίες, έξοδα και κατανάλωση των οχημάτων σου',
+      passo1: 'Βήμα 1 · Κατέβασε την εφαρμογή',
+      cerco: 'Αναζήτηση της τελευταίας έκδοσης…',
+      tuo: 'η συσκευή σου',
+      scaricaAndroid: 'Λήψη για Android · {v}',
+      scaricaMac: 'Λήψη για Mac',
+      ios: 'iPhone και iPad',
+      inArrivo: 'Σύντομα',
+      notaAndroid: 'Επίτρεψε την εγκατάσταση από αυτήν την πηγή. Αν το Play Protect εμφανίσει προειδοποίηση, επίλεξε «Εγκατάσταση ούτως ή άλλως».',
+      notaMac: 'Άνοιξε το αρχείο που κατέβασες και σύρε το MotorSage στις Εφαρμογές. Αν το Mac το μπλοκάρει στο πρώτο άνοιγμα: Ρυθμίσεις συστήματος → Απόρρητο και ασφάλεια → «Άνοιγμα οπωσδήποτε».',
+      qr: 'Θέλεις την εφαρμογή στο κινητό; Σάρωσε αυτόν τον κωδικό.',
+      passo2: 'Βήμα 2 · Μπες',
+      passo2Testo: 'Άνοιξε το MotorSage, πάτα «Έλαβα πρόσκληση» και γράψε τη διεύθυνση email στην οποία έλαβες την πρόσκληση. Θα σου έρθει ένας κωδικός 6 ψηφίων.',
+      ripiego: 'Δεν μπόρεσα να διαβάσω τις διαθέσιμες εκδόσεις.',
+      apriVersioni: 'Άνοιγμα της σελίδας με τις εκδόσεις',
+    },
+  };
+
+  // Lingua: parametro ?lingua=, poi il browser, poi italiano.
+  // Solo le chiavi proprie di TESTI: «constructor» o «__proto__» non valgono.
+  const eLingua = codice => Object.prototype.hasOwnProperty.call(TESTI, codice);
+  function sceltaLingua() {
+    const richiesta = (new URLSearchParams(location.search).get('lingua') || '').toLowerCase();
+    if (eLingua(richiesta)) return richiesta;
+    const lingueBrowser = navigator.languages && navigator.languages.length
+      ? navigator.languages : [navigator.language || ''];
+    for (const l of lingueBrowser) {
+      const base = String(l).toLowerCase().split('-')[0];
+      if (eLingua(base)) return base;
+    }
+    return 'it';
+  }
+  const lingua = sceltaLingua();
+  const t = TESTI[lingua];
+  document.documentElement.lang = lingua;
+  document.title = t.titolo;
+  for (const el of document.querySelectorAll('[data-t]')) {
+    const testo = t[el.dataset.t];
+    if (testo !== undefined) el.textContent = testo.replace(' · {v}', '');
+  }
+
+  // Dispositivo: android, mac, ios o altro (un computer qualunque).
+  // Un iPad con iPadOS si presenta come Mac: lo tradisce lo schermo a tocco.
+  function sceltaDispositivo() {
+    const ua = navigator.userAgent || '';
+    if (/Android/i.test(ua)) return 'android';
+    if (/iPhone|iPad|iPod/i.test(ua)) return 'ios';
+    if (/Macintosh/i.test(ua)) return navigator.maxTouchPoints > 1 ? 'ios' : 'mac';
+    return 'altro';
+  }
+  const dispositivo = sceltaDispositivo();
+
+  // «v1.8.1-b20» → «1.8.1»: il numero senza la v e senza il numero di build.
+  function versioneDaTag(tag) {
+    const m = /^v?(\d+(?:\.\d+)*)/.exec(String(tag || ''));
+    return m ? m[1] : '';
+  }
+
+  // Cerca il file per estensione, non per nome: i nomi sono cambiati
+  // (parco-veicoli-… prima, motorsage-… ora).
+  function trovaFile(assets, regex) {
+    const trovati = (assets || []).filter(a => regex.test(a.name || '') && a.browser_download_url);
+    const preferito = trovati.find(a => /arm64/i.test(a.name));
+    return (preferito || trovati[0] || {}).browser_download_url || '';
+  }
+
+  // Il codice QR della pagina stessa, per aprirla sul telefono. Solo da un
+  // computer; senza lo script o senza rete la pagina funziona lo stesso.
+  function mostraQr() {
+    if (!(dispositivo === 'mac' || dispositivo === 'altro') || typeof qrcode !== 'function') return;
+    try {
+      const qr = qrcode(0, 'M');
+      qr.addData(location.href.split('#')[0]);
+      qr.make();
+      document.getElementById('qr-codice').innerHTML =
+        qr.createSvgTag({ cellSize: 4, margin: 4, scalable: true });
+      document.getElementById('qr').hidden = false;
+    } catch (e) { /* senza QR la pagina funziona lo stesso */ }
+  }
+
+  // Mostra le schede: quella del dispositivo riconosciuto in cima e in
+  // evidenza. Ogni download compare solo se il suo file esiste; se manca, la
+  // scheda lo dice e rimanda alla pagina delle versioni. Con download=false
+  // (GitHub non risponde o nessun file) restano solo iPhone e iPad.
+  function mostraSchede(apk, mac, versione, download) {
+    const ordine = ['android', 'mac', 'ios'];
+    if (ordine.includes(dispositivo)) {
+      ordine.splice(ordine.indexOf(dispositivo), 1);
+      ordine.unshift(dispositivo);
+    }
+    const contenitore = document.getElementById('schede');
+    ordine.forEach(sistema => {
+      const scheda = contenitore.querySelector('[data-sistema="' + sistema + '"]');
+      contenitore.appendChild(scheda);
+      scheda.hidden = sistema !== 'ios' && !download;
+      const evidenza = sistema === dispositivo;
+      scheda.classList.toggle('evidenza', evidenza);
+      scheda.querySelector('.badge').hidden = !evidenza;
+    });
+    function imposta(sistema, url) {
+      const scheda = contenitore.querySelector('[data-sistema="' + sistema + '"]');
+      scheda.querySelector('.pulsante').hidden = !url;
+      scheda.querySelector('.nota').hidden = !url;
+      scheda.querySelector('.manca').hidden = !!url;
+    }
+    imposta('android', apk);
+    imposta('mac', mac);
+    const bAndroid = document.getElementById('scarica-android');
+    bAndroid.href = apk || '#';
+    bAndroid.textContent = versione
+      ? t.scaricaAndroid.replace('{v}', versione)
+      : t.scaricaAndroid.replace(' · {v}', '');
+    document.getElementById('scarica-mac').href = mac || '#';
+    document.getElementById('stato').hidden = true;
+    document.getElementById('ripiego').hidden = download;
+    mostraQr();
+  }
+
+  async function carica() {
+    const controllo = new AbortController();
+    const scadenza = setTimeout(() => controllo.abort(), 8000);
+    try {
+      const risposta = await fetch(URL_RILASCIO, {
+        headers: { Accept: 'application/vnd.github+json' },
+        signal: controllo.signal,
+      });
+      if (!risposta.ok) throw new Error('GitHub ha risposto ' + risposta.status);
+      const rilascio = await risposta.json();
+      const apk = trovaFile(rilascio.assets, /\.apk$/i);
+      const mac = trovaFile(rilascio.assets, /macos.*\.zip$/i);
+      mostraSchede(apk, mac, versioneDaTag(rilascio.tag_name), !!(apk || mac));
+    } catch (e) {
+      // GitHub non risponde: collegamento alla pagina delle versioni.
+      mostraSchede('', '', '', false);
+    } finally {
+      clearTimeout(scadenza);
+    }
+  }
+  carica();
+</script>
+</body>
+</html>

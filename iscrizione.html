@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>MotorSage · Richiesta d'iscrizione</title>
+<!--
+  Gemella di richiesta.html, per le richieste d'iscrizione (chi chiede un
+  invito). Pagina intermedia fra l'email all'amministratore e l'app: la posta
+  nel browser e le app del telefono tolgono i collegamenti diretti all'app
+  (it.parcoveicoli://), un indirizzo web normale invece si apre ovunque.
+  Non legge né mostra dati e non rivede nulla: porta solo il codice della
+  richiesta all'app, dove si accetta o si rifiuta.
+-->
+<style>
+  /* Carattere ospitato qui (licenza OFL, vedi fonts/OFL.txt). */
+  @font-face { font-family: "Manrope"; font-weight: 400; font-style: normal; font-display: swap; src: url("fonts/Manrope-Regular.ttf") format("truetype"); }
+  @font-face { font-family: "Manrope"; font-weight: 600; font-style: normal; font-display: swap; src: url("fonts/Manrope-SemiBold.ttf") format("truetype"); }
+  :root { color-scheme: light dark; --primario: #1b6b5a; }
+  body {
+    margin: 0; padding: 40px 16px; display: flex; justify-content: center;
+    font-family: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: Canvas; color: CanvasText;
+  }
+  main { max-width: 420px; width: 100%; text-align: center; }
+  h1 { font-size: 1.4rem; margin-bottom: 8px; }
+  p { line-height: 1.5; }
+  .pulsante {
+    display: inline-block; margin: 16px 0; padding: 14px 24px;
+    border-radius: 12px; background: var(--primario); color: #fff;
+    font-weight: 600; text-decoration: none;
+  }
+  .nota { opacity: .75; font-size: .95rem; }
+  [hidden] { display: none; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Richiesta d'iscrizione</h1>
+  <section id="valida" hidden>
+    <p>Apri la richiesta in MotorSage per accettarla o rifiutarla.</p>
+    <a id="apri" class="pulsante" href="#">Apri in MotorSage</a>
+    <p class="nota">Se l'app non si apre: in MotorSage, Impostazioni → Richieste d'iscrizione.</p>
+  </section>
+  <section id="non-valida" hidden>
+    <p>Il collegamento non è completo. In MotorSage le richieste d'iscrizione sono in Impostazioni → Richieste d'iscrizione.</p>
+  </section>
+</main>
+<script>
+  const id = new URLSearchParams(location.search).get('id') || '';
+  const valido = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+  document.getElementById(valido ? 'valida' : 'non-valida').hidden = false;
+  if (valido) {
+    document.getElementById('apri').href =
+      'it.parcoveicoli://iscrizioni?id=' + id.toLowerCase();
+  }
+</script>
+</body>
+</html>
