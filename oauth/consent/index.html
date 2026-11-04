@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>MotorSage · Collega un assistente</title>
+<!--
+  Pagina di consenso del server OAuth di Supabase: ci arriva chi aggiunge
+  MotorSage al proprio assistente (Claude, ChatGPT…), con ?authorization_id=…
+  Versione minima della tappa 1 (Task 4): solo italiano, sola lettura.
+
+  1. ingresso con email e codice, come nell'app (nessun account nuovo);
+  2. nome dell'assistente e sito verso cui si torna, letti dal server di
+     accesso (getAuthorizationDetails); se il consenso c'è già si torna
+     subito all'assistente;
+  3. «Collega»: prima collega-assistente, che verifica tutto dal server e
+     scrive il collegamento, poi approveAuthorization; «Annulla»:
+     denyAuthorization. In tutti e due i casi si segue il redirect_url.
+
+  La sessione resta solo in memoria: su p3labadmin.github.io pagine di altri
+  progetti condividono la stessa origine e quindi lo stesso localStorage.
+  Le costanti qui sotto sono pubbliche per costruzione (la chiave
+  «publishable» è già dentro l'app); nessun'altra chiave va in questo file.
+  supabase-js arriva da jsDelivr con versione esatta e controllo d'integrità.
+  Ogni testo che viene da fuori (nome dell'assistente, sito, email) si scrive
+  con textContent, mai come HTML.
+-->
+<style>
+  :root {
+    color-scheme: light dark;
+    --primario: #1F6FEB; --sfondo: #f5f8fe; --scheda: #ffffff; --testo: #14213d;
+    --testo-2: #56627a; --bordo: #dbe4f3; --errore: #b42318;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --primario: #4a8dff; --sfondo: #0e1524; --scheda: #172036; --testo: #eef3fc;
+      --testo-2: #a3b0c8; --bordo: #283454; --errore: #ff8a80;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 32px 16px 48px; background: var(--sfondo); color: var(--testo);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5; overflow-wrap: anywhere;
+  }
+  main { max-width: 440px; margin: 0 auto; }
+  h1 { font-size: 1.5rem; margin: 0 0 20px; line-height: 1.25; }
+  .scheda { background: var(--scheda); border: 1px solid var(--bordo); border-radius: 16px; padding: 18px; }
+  label { display: block; font-weight: 600; margin-bottom: 6px; }
+  input {
+    width: 100%; padding: 12px; font: inherit; border-radius: 10px;
+    border: 1px solid var(--bordo); background: var(--sfondo); color: var(--testo);
+  }
+  button {
+    display: block; width: 100%; margin-top: 12px; padding: 13px 16px; border-radius: 12px;
+    font: inherit; font-weight: 700; cursor: pointer; border: 1px solid var(--primario);
+  }
+  button.primario { background: var(--primario); color: #fff; }
+  button.secondario { background: transparent; color: var(--primario); }
+  button:disabled { opacity: .55; cursor: default; }
+  button:focus-visible, input:focus-visible { outline: 3px solid var(--testo); outline-offset: 2px; }
+  .nota { color: var(--testo-2); font-size: .93rem; }
+  .messaggio { margin: 14px 0 0; font-weight: 600; }
+  .messaggio.errore { color: var(--errore); }
+  .nome { font-size: 1.15rem; font-weight: 700; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main id="pagina">
+  <h1>Collega un assistente a MotorSage</h1>
+  <noscript><p>Per collegare un assistente serve JavaScript.</p></noscript>
+
+  <div class="scheda">
+    <form id="modulo-email" hidden>
+      <p class="nota">Entra con l'email del tuo account MotorSage: ti mandiamo un codice.</p>
+      <label for="email">Email</label>
+      <input id="email" type="email" autocomplete="email" required>
+      <button class="primario" type="submit">Mandami il codice</button>
+    </form>
+
+    <form id="modulo-codice" hidden>
+      <p class="nota">Abbiamo mandato un codice a <strong id="email-mandata"></strong>.</p>
+      <label for="codice">Codice</label>
+      <input id="codice" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6,10}" maxlength="10" required>
+      <button class="primario" type="submit">Entra</button>
+      <button class="secondario" type="button" id="altra-email">Usa un'altra email</button>
+    </form>
+
+    <section id="consenso" hidden>
+      <p><span class="nome" id="nome-assistente"></span> vuole collegarsi al tuo account MotorSage.</p>
+      <p>Ti collegherai a: <strong id="sito"></strong></p>
+      <p>Potrà <strong>solo leggere</strong> i tuoi dati: veicoli, spese, scadenze, documenti, profilo e preferenze. Non potrà cambiare nulla.</p>
+      <p class="nota">Quello che l'assistente legge passa anche dal suo fornitore (per esempio Anthropic per Claude, OpenAI per ChatGPT), secondo le regole di quel fornitore.</p>
+      <p class="nota">Account: <span id="account"></span></p>
+      <button class="primario" type="button" id="collega">Collega</button>
+      <button class="secondario" type="button" id="annulla">Annulla</button>
+    </section>
+
+    <p id="messaggio" class="messaggio" role="status" aria-live="polite">Un momento…</p>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"
+        integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK"
+        crossorigin="anonymous"></script>
+<script>
+'use strict';
+// Indirizzo e chiave pubblica («publishable») del progetto, gli stessi dell'app.
+const SUPABASE_URL = 'https://bavuvoghfzleutkwwhxg.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_-d85VsRn_hIhT3sW5uj3sQ_4b-QgQgB';
+
+const $ = (id) => document.getElementById(id);
+const idAutorizzazione = new URLSearchParams(location.search).get('authorization_id') || '';
+let db = null;
+let email = '';
+
+function messaggio(testo, errore = false) {
+  $('messaggio').textContent = testo;
+  $('messaggio').classList.toggle('errore', errore);
+}
+
+function mostra(id) {
+  for (const s of ['modulo-email', 'modulo-codice', 'consenso']) $(s).hidden = s !== id;
+}
+
+function blocca(sì) {
+  for (const b of document.querySelectorAll('button')) b.disabled = sì;
+}
+
+// Gli schemi pericolosi li rifiuta già il server di accesso quando un client
+// si registra; qui si ricontrolla prima di uscire dalla pagina.
+function vaiA(indirizzo) {
+  let url;
+  try { url = new URL(indirizzo); } catch { url = null; }
+  if (!url || ['javascript:', 'data:', 'vbscript:', 'blob:', 'file:', 'about:'].includes(url.protocol)) {
+    messaggio('L\'indirizzo di ritorno dell\'assistente non è valido: il collegamento non si può completare.', true);
+    return;
+  }
+  location.assign(url.href);
+}
+
+// Il sito a cui si torna, come lo vede una persona: «claude.ai».
+function sitoLeggibile(uri) {
+  try {
+    const u = new URL(uri);
+    return u.protocol === 'https:' ? u.host : `${u.protocol}//${u.host}`;
+  } catch {
+    return uri;
+  }
+}
+
+function avvia() {
+  // Dentro la pagina di un altro sito non si mostra e non si fa nulla.
+  if (window.top !== window.self) {
+    $('pagina').hidden = true;
+    return;
+  }
+  if (!/^[A-Za-z0-9]{8,128}$/.test(idAutorizzazione)) {
+    messaggio('Questa pagina si apre dall\'assistente, quando aggiungi MotorSage fra i suoi connettori.', true);
+    return;
+  }
+  if (!window.supabase) {
+    messaggio('La pagina non si è caricata del tutto: ricaricala.', true);
+    return;
+  }
+  db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  });
+  mostra('modulo-email');
+  messaggio('');
+  $('email').focus();
+}
+
+$('modulo-email').addEventListener('submit', async (evento) => {
+  evento.preventDefault();
+  email = $('email').value.trim();
+  blocca(true);
+  messaggio('Invio il codice…');
+  const { error } = await db.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
+  blocca(false);
+  if (error) {
+    console.error('signInWithOtp', error.status, error.code);
+    if (error.status === 429) messaggio('Troppi tentativi: aspetta qualche minuto e riprova.', true);
+    else if (['otp_disabled', 'signup_disabled', 'user_not_found'].includes(error.code)) {
+      messaggio('Non c\'è un account MotorSage con questa email.', true);
+    } else messaggio('Non è stato possibile mandare il codice: riprova fra poco.', true);
+    return;
+  }
+  $('email-mandata').textContent = email;
+  mostra('modulo-codice');
+  messaggio('');
+  $('codice').focus();
+});
+
+$('altra-email').addEventListener('click', () => {
+  $('codice').value = '';
+  mostra('modulo-email');
+  messaggio('');
+});
+
+$('modulo-codice').addEventListener('submit', async (evento) => {
+  evento.preventDefault();
+  blocca(true);
+  messaggio('Controllo il codice…');
+  const { error } = await db.auth.verifyOtp({ email, token: $('codice').value.trim(), type: 'email' });
+  if (error) {
+    blocca(false);
+    console.error('verifyOtp', error.status, error.code);
+    messaggio(error.status === 429
+      ? 'Troppi tentativi: aspetta qualche minuto e riprova.'
+      : 'Il codice non è giusto o è scaduto.', true);
+    return;
+  }
+  await caricaDettagli();
+  blocca(false);
+});
+
+async function caricaDettagli() {
+  messaggio('Leggo la richiesta dell\'assistente…');
+  const { data, error } = await db.auth.oauth.getAuthorizationDetails(idAutorizzazione);
+  if (error || !data) {
+    console.error('getAuthorizationDetails', error && error.status, error && error.code);
+    mostra(null);
+    messaggio('Questa richiesta di collegamento non è più valida (scaduta o già usata): riparti dall\'assistente.', true);
+    return;
+  }
+  // Senza authorization_id il consenso c'è già: si torna all'assistente.
+  if (!data.authorization_id) {
+    messaggio('Collegamento già autorizzato: torno all\'assistente…');
+    vaiA(data.redirect_url);
+    return;
+  }
+  $('nome-assistente').textContent = (data.client && data.client.name) || 'Un assistente senza nome';
+  $('sito').textContent = sitoLeggibile(data.redirect_uri);
+  $('account').textContent = (data.user && data.user.email) || email;
+  mostra('consenso');
+  messaggio('');
+}
+
+$('collega').addEventListener('click', async () => {
+  blocca(true);
+  messaggio('Collego l\'assistente…');
+  try {
+    const { data: { session } } = await db.auth.getSession();
+    const risposta = await fetch(`${SUPABASE_URL}/functions/v1/collega-assistente`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+        apikey: SUPABASE_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ authorization_id: idAutorizzazione }),
+    });
+    const esito = await risposta.json().catch(() => ({}));
+    if (!risposta.ok || !esito.ok) {
+      console.error('collega-assistente', risposta.status, esito.errore);
+      if (esito.errore === 'ELIMINAZIONE') {
+        messaggio('Il tuo account è in eliminazione: non si possono collegare assistenti.', true);
+      } else if (esito.errore === 'DETTAGLI') {
+        messaggio('Questa richiesta di collegamento non è più valida (scaduta o già usata): riparti dall\'assistente.', true);
+      } else {
+        messaggio('Non è stato possibile collegare l\'assistente: riprova fra poco.', true);
+        blocca(false);
+      }
+      return;
+    }
+    const { data, error } = await db.auth.oauth.approveAuthorization(idAutorizzazione, { skipBrowserRedirect: true });
+    if (error || !data || !data.redirect_url) {
+      console.error('approveAuthorization', error && error.status, error && error.code);
+      messaggio('Non è stato possibile completare il collegamento: riparti dall\'assistente.', true);
+      return;
+    }
+    messaggio('Fatto: torno all\'assistente…');
+    vaiA(data.redirect_url);
+  } catch (e) {
+    console.error('collega', e);
+    messaggio('Non è stato possibile collegare l\'assistente: riprova fra poco.', true);
+    blocca(false);
+  }
+});
+
+$('annulla').addEventListener('click', async () => {
+  blocca(true);
+  messaggio('Annullo…');
+  const { data, error } = await db.auth.oauth.denyAuthorization(idAutorizzazione, { skipBrowserRedirect: true });
+  if (error || !data || !data.redirect_url) {
+    console.error('denyAuthorization', error && error.status, error && error.code);
+    mostra(null);
+    messaggio('Collegamento annullato. Puoi chiudere questa pagina.');
+    return;
+  }
+  messaggio('Collegamento annullato: torno all\'assistente…');
+  vaiA(data.redirect_url);
+});
+
+avvia();
+</script>
+</body>
+</html>
