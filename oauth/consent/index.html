@@ -44,13 +44,14 @@
   @font-face { font-family: "Manrope"; font-weight: 700; font-style: normal; font-display: swap; src: url("../../fonts/Manrope-Bold.ttf") format("truetype"); }
   :root {
     color-scheme: light dark;
-    --primario: #1F6FEB; --sfondo: #f5f8fe; --scheda: #ffffff; --testo: #14213d;
-    --testo-2: #56627a; --bordo: #dbe4f3; --errore: #b42318;
+    /* --primario riempie (pulsanti, passo attuale), --primario-testo colora le scritte blu */
+    --primario: #1F6FEB; --primario-testo: #1b67de; --sfondo: #f5f8fe; --scheda: #ffffff; --testo: #14213d;
+    --testo-2: #56627a; --bordo: #dbe4f3; --cerchio: #dbe4f3; --errore: #b42318;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --primario: #4a8dff; --sfondo: #0e1524; --scheda: #172036; --testo: #eef3fc;
-      --testo-2: #a3b0c8; --bordo: #283454; --errore: #ff8a80;
+      --primario: #2f6fe0; --primario-testo: #4a8dff; --sfondo: #0e1524; --scheda: #172036; --testo: #eef3fc;
+      --testo-2: #b4bfd4; --bordo: #283454; --cerchio: #5b6b8c; --errore: #ff8a80;
     }
   }
   * { box-sizing: border-box; }
@@ -68,9 +69,9 @@
   #passi li + li::before { content: "·" / ""; margin-right: 8px; }
   #passi .numero {
     display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px;
-    border-radius: 50%; border: 1px solid var(--bordo); font-size: .78rem; font-weight: 700;
+    border-radius: 50%; border: 1px solid var(--cerchio); font-size: .78rem; font-weight: 700;
   }
-  #passi li[aria-current="step"] { color: var(--primario); font-weight: 700; }
+  #passi li[aria-current="step"] { color: var(--primario-testo); font-weight: 700; }
   #passi li[aria-current="step"] .numero { border-color: var(--primario); background: var(--primario); color: #fff; }
   .scheda { background: var(--scheda); border: 1px solid var(--bordo); border-radius: 16px; padding: 18px; }
   label { display: block; font-weight: 600; margin-bottom: 6px; }
@@ -83,7 +84,7 @@
     font: inherit; font-weight: 700; cursor: pointer; border: 1px solid var(--primario);
   }
   button.primario { background: var(--primario); color: #fff; }
-  button.secondario { background: transparent; color: var(--primario); }
+  button.secondario { background: transparent; color: var(--primario-testo); border-color: var(--primario-testo); }
   button:disabled { opacity: .55; cursor: default; }
   button:focus-visible, input:focus-visible { outline: 3px solid var(--testo); outline-offset: 2px; }
   .nota { color: var(--testo-2); font-size: .93rem; }
