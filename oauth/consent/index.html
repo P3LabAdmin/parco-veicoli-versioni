@@ -4,21 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js 'sha256-y0fsDdTDR+h4476QEaDTOgiv9BjEhExn+jhQv4p+PKc='; style-src 'unsafe-inline'; connect-src https://bavuvoghfzleutkwwhxg.supabase.co; base-uri 'none'; form-action 'none'">
-<title>MotorSage · Collega un assistente</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js 'sha256-E/tiKBTqKv7tENep2iuLtRUZQaH84TnX9y3+dgmEdh0='; style-src 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src https://bavuvoghfzleutkwwhxg.supabase.co; base-uri 'none'; form-action 'none'">
+<title>MotorSage · Collega la tua AI</title>
 <!--
   Pagina di consenso del server OAuth di Supabase: ci arriva chi aggiunge
-  MotorSage al proprio assistente (Claude, ChatGPT…), con ?authorization_id=…
+  MotorSage alla propria AI (Claude, ChatGPT…), con ?authorization_id=…
   Cinque lingue (?lang= oppure quella del browser, altrimenti inglese).
 
   1. ingresso con email e codice, come nell'app (nessun account nuovo);
-  2. nome dell'assistente e «Ti collegherai a: <sito>», letti dal server di
+  2. nome dell'AI e «Ti collegherai a: <sito>», letti dal server di
      accesso (getAuthorizationDetails); avviso se il sito non è fra quelli
-     noti; se il consenso c'è già, prima di tornare all'assistente si
+     noti; se il consenso c'è già, prima di tornare all'AI si
      revocano i consensi senza collegamento o scaduti (vedi ripulisciConsensi);
   3. «Collega»: prima collega-assistente, che verifica tutto dal server e
      scrive il collegamento, poi approveAuthorization; «Annulla»:
      denyAuthorization. In tutti e due i casi si segue il redirect_url.
+  Veste di MotorSage: marchio e caratteri Manrope stanno sullo stesso sito
+  (../../marchio*.png, ../../fonts/), per questo il CSP ammette img-src e
+  font-src 'self'.
 
   La sessione resta solo in memoria: su p3labadmin.github.io pagine di altri
   progetti condividono la stessa origine e quindi lo stesso localStorage.
@@ -26,7 +29,7 @@
   «publishable» è già dentro l'app); nessun'altra chiave va in questo file.
   supabase-js arriva da jsDelivr con versione esatta e controllo d'integrità.
   Il CSP ammette solo quel file di jsDelivr (non tutto il sito).
-  Ogni testo che viene da fuori (nome dell'assistente, sito, email) si scrive
+  Ogni testo che viene da fuori (nome dell'AI, sito, email) si scrive
   con textContent, mai come HTML.
 
   Il CSP qui sopra ammette lo script in linea solo con il suo hash: se si
@@ -36,6 +39,9 @@
   non vale in un meta): ci pensa il controllo window.top nello script.
 -->
 <style>
+  @font-face { font-family: "Manrope"; font-weight: 400; font-style: normal; font-display: swap; src: url("../../fonts/Manrope-Regular.ttf") format("truetype"); }
+  @font-face { font-family: "Manrope"; font-weight: 600; font-style: normal; font-display: swap; src: url("../../fonts/Manrope-SemiBold.ttf") format("truetype"); }
+  @font-face { font-family: "Manrope"; font-weight: 700; font-style: normal; font-display: swap; src: url("../../fonts/Manrope-Bold.ttf") format("truetype"); }
   :root {
     color-scheme: light dark;
     --primario: #1F6FEB; --sfondo: #f5f8fe; --scheda: #ffffff; --testo: #14213d;
@@ -50,11 +56,22 @@
   * { box-sizing: border-box; }
   body {
     margin: 0; padding: 32px 16px 48px; background: var(--sfondo); color: var(--testo);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     line-height: 1.5; overflow-wrap: anywhere;
   }
   main { max-width: 440px; margin: 0 auto; }
-  h1 { font-size: 1.5rem; margin: 0 0 20px; line-height: 1.25; }
+  header { text-align: center; margin-bottom: 20px; }
+  .marchio { display: block; width: 96px; height: auto; margin: 0 auto 12px; }
+  h1 { font-size: 1.5rem; margin: 0 0 16px; line-height: 1.25; }
+  #passi { list-style: none; margin: 0; padding: 0; display: flex; justify-content: center; flex-wrap: wrap; gap: 6px 14px; font-size: .9rem; color: var(--testo-2); }
+  #passi li { display: flex; align-items: center; gap: 6px; }
+  #passi li + li::before { content: "·" / ""; margin-right: 8px; }
+  #passi .numero {
+    display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px;
+    border-radius: 50%; border: 1px solid var(--bordo); font-size: .78rem; font-weight: 700;
+  }
+  #passi li[aria-current="step"] { color: var(--primario); font-weight: 700; }
+  #passi li[aria-current="step"] .numero { border-color: var(--primario); background: var(--primario); color: #fff; }
   .scheda { background: var(--scheda); border: 1px solid var(--bordo); border-radius: 16px; padding: 18px; }
   label { display: block; font-weight: 600; margin-bottom: 6px; }
   input {
@@ -62,7 +79,7 @@
     border: 1px solid var(--bordo); background: var(--sfondo); color: var(--testo);
   }
   button {
-    display: block; width: 100%; margin-top: 12px; padding: 13px 16px; border-radius: 12px;
+    display: block; width: 100%; min-height: 48px; margin-top: 12px; padding: 13px 16px; border-radius: 14px;
     font: inherit; font-weight: 700; cursor: pointer; border: 1px solid var(--primario);
   }
   button.primario { background: var(--primario); color: #fff; }
@@ -81,45 +98,24 @@
   .livello.spento { color: var(--testo-2); }
   .livello small { display: block; margin-left: 28px; color: var(--testo-2); }
   .etichetta { font-size: .8rem; font-weight: 700; border: 1px solid var(--bordo); border-radius: 999px; padding: 1px 8px; margin-left: 6px; color: var(--testo-2); }
-  .avviso { border: 2px solid var(--errore); border-radius: 12px; padding: 10px 12px; font-weight: 600; color: var(--errore); }
-  fieldset { border: 1px solid var(--bordo); border-radius: 12px; margin: 16px 0 0; padding: 10px 12px 12px; }
-  legend { font-weight: 700; padding: 0 6px; }
-  .livello { display: block; margin: 8px 0 0; font-weight: 400; }
-  .livello input { width: auto; margin-right: 8px; }
-  .livello.spento { color: var(--testo-2); }
-  .livello small { display: block; margin-left: 28px; color: var(--testo-2); }
-  .etichetta { font-size: .8rem; font-weight: 700; border: 1px solid var(--bordo); border-radius: 999px; padding: 1px 8px; margin-left: 6px; color: var(--testo-2); }
-  .avviso { border: 2px solid var(--errore); border-radius: 12px; padding: 10px 12px; font-weight: 600; color: var(--errore); }
-  fieldset { border: 1px solid var(--bordo); border-radius: 12px; margin: 16px 0 0; padding: 10px 12px 12px; }
-  legend { font-weight: 700; padding: 0 6px; }
-  .livello { display: block; margin: 8px 0 0; font-weight: 400; }
-  .livello input { width: auto; margin-right: 8px; }
-  .livello.spento { color: var(--testo-2); }
-  .livello small { display: block; margin-left: 28px; color: var(--testo-2); }
-  .etichetta { font-size: .8rem; font-weight: 700; border: 1px solid var(--bordo); border-radius: 999px; padding: 1px 8px; margin-left: 6px; color: var(--testo-2); }
-  .avviso { border: 2px solid var(--errore); border-radius: 12px; padding: 10px 12px; font-weight: 600; color: var(--errore); }
-  fieldset { border: 1px solid var(--bordo); border-radius: 12px; margin: 16px 0 0; padding: 10px 12px 12px; }
-  legend { font-weight: 700; padding: 0 6px; }
-  .livello { display: block; margin: 8px 0 0; font-weight: 400; }
-  .livello input { width: auto; margin-right: 8px; }
-  .livello.spento { color: var(--testo-2); }
-  .livello small { display: block; margin-left: 28px; color: var(--testo-2); }
-  .etichetta { font-size: .8rem; font-weight: 700; border: 1px solid var(--bordo); border-radius: 999px; padding: 1px 8px; margin-left: 6px; color: var(--testo-2); }
-  .avviso { border: 2px solid var(--errore); border-radius: 12px; padding: 10px 12px; font-weight: 600; color: var(--errore); }
-  fieldset { border: 1px solid var(--bordo); border-radius: 12px; margin: 16px 0 0; padding: 10px 12px 12px; }
-  legend { font-weight: 700; padding: 0 6px; }
-  .livello { display: block; margin: 8px 0 0; font-weight: 400; }
-  .livello input { width: auto; margin-right: 8px; }
-  .livello.spento { color: var(--testo-2); }
-  .livello small { display: block; margin-left: 28px; color: var(--testo-2); }
-  .etichetta { font-size: .8rem; font-weight: 700; border: 1px solid var(--bordo); border-radius: 999px; padding: 1px 8px; margin-left: 6px; color: var(--testo-2); }
   [hidden] { display: none !important; }
 </style>
 </head>
 <body>
 <main id="pagina">
-  <h1 data-t="titolo">Collega un assistente a MotorSage</h1>
-  <noscript><p>Per collegare un assistente serve JavaScript. / JavaScript is required.</p></noscript>
+  <header>
+    <picture>
+      <source srcset="../../marchio_scuro.png" media="(prefers-color-scheme: dark)">
+      <img class="marchio" src="../../marchio.png" alt="MotorSage" width="96" height="73">
+    </picture>
+    <h1 id="titolo" data-t="titolo">Collega la tua AI a MotorSage</h1>
+    <ol id="passi" role="list" data-aria="passi">
+      <li id="passo-1"><span class="numero" aria-hidden="true">1</span><span data-t="passoEmail"></span></li>
+      <li id="passo-2"><span class="numero" aria-hidden="true">2</span><span data-t="passoCodice"></span></li>
+      <li id="passo-3"><span class="numero" aria-hidden="true">3</span><span data-t="passoConferma"></span></li>
+    </ol>
+  </header>
+  <noscript><p>Per collegare la tua AI serve JavaScript. / JavaScript is required.</p></noscript>
 
   <div class="scheda">
     <form id="modulo-email" hidden>
@@ -156,6 +152,7 @@
       <p class="nota"><span data-t="account"></span> <span id="account"></span></p>
       <button class="primario" type="button" id="collega" data-t="collega"></button>
       <button class="secondario" type="button" id="annulla" data-t="annulla"></button>
+      <p class="nota" id="solo-lettura"></p>
     </section>
 
     <p id="messaggio" class="messaggio" role="status" aria-live="polite"></p>
@@ -173,189 +170,214 @@ const SUPABASE_KEY = 'sb_publishable_-d85VsRn_hIhT3sW5uj3sQ_4b-QgQgB';
 // Testi nelle cinque lingue dell'app (tu, senza genere).
 const TESTI = {
   it: {
-    titolo: 'Collega un assistente a MotorSage',
-    noscript: 'Per collegare un assistente serve JavaScript.',
+    titolo: 'Collega la tua AI a MotorSage',
+    titoloCon: 'Collega {nome} a MotorSage',
+    noscript: 'Per collegare la tua AI serve JavaScript.',
+    passoEmail: 'Email', passoCodice: 'Codice', passoConferma: 'Conferma',
     emailIntro: 'Entra con l\'email del tuo account MotorSage: ti mandiamo un codice.',
     email: 'Email', mandaCodice: 'Mandami il codice',
     codiceMandato: 'Abbiamo mandato un codice a', codice: 'Codice', entra: 'Entra',
     altraEmail: 'Usa un\'altra email',
     vuole: '{nome} vuole collegarsi al tuo account MotorSage.',
     sito: 'Ti collegherai a:',
-    soloSeTuo: 'Collega solo se l\'indirizzo di MotorSage l\'hai aggiunto tu, adesso, nel tuo assistente.',
-    sconosciuto: 'Attenzione: questo sito non è fra quelli degli assistenti che conosciamo. Collega solo se il collegamento è partito da un assistente di cui ti fidi.',
+    soloSeTuo: 'Collega solo se hai avviato tu il collegamento, adesso, dall\'app MotorSage o dalla tua AI.',
+    soloLettura: '{nome} potrà solo leggere. La scolleghi quando vuoi da Impostazioni → AI collegate.',
+    vuoleSenzaNome: 'Un\'AI senza nome vuole collegarsi al tuo account MotorSage.',
+    soloLetturaSenzaNome: 'Potrà solo leggere. La scolleghi quando vuoi da Impostazioni → AI collegate.',
+    passi: 'Passaggi',
+    sconosciuto: 'Attenzione: questo sito non è fra quelli delle AI che conosciamo. Collega solo se il collegamento è partito da un\'AI di cui ti fidi.',
     livelli: 'Cosa potrà fare', lettura: 'Sola lettura',
     letturaDesc: 'Può leggere veicoli, spese, scadenze, documenti, profilo e preferenze. Non può cambiare nulla.',
     aggiunte: 'Lettura e aggiunte', completo: 'Completo', inArrivo: 'In arrivo',
-    privacy: 'Quello che l\'assistente legge passa anche dal suo fornitore (per esempio Anthropic per Claude, OpenAI per ChatGPT), secondo le regole di quel fornitore.',
+    privacy: 'Quello che l\'AI legge passa anche dal suo fornitore (per esempio Anthropic per Claude, OpenAI per ChatGPT), secondo le regole di quel fornitore.',
     account: 'Account:', collega: 'Collega', annulla: 'Annulla',
     attendi: 'Un momento…', invio: 'Invio il codice…', controllo: 'Controllo il codice…',
-    leggo: 'Leggo la richiesta dell\'assistente…', collego: 'Collego l\'assistente…', annullo: 'Annullo…',
-    fatto: 'Fatto: torno all\'assistente…', annullato: 'Collegamento annullato: torno all\'assistente…',
-    nonAperta: 'Questa pagina si apre dall\'assistente, quando aggiungi MotorSage fra i suoi connettori.',
+    leggo: 'Leggo la richiesta della tua AI…', collego: 'Collego la tua AI…', annullo: 'Annullo…',
+    fatto: 'Fatto: torno alla tua AI…', annullato: 'Collegamento annullato: torno alla tua AI…',
+    nonAperta: 'Questa pagina si apre dall\'AI, quando aggiungi MotorSage fra i suoi connettori.',
     nonCaricata: 'La pagina non si è caricata del tutto: ricaricala.',
-    rimandoNonValido: 'L\'indirizzo di ritorno dell\'assistente non è valido: il collegamento non si può completare.',
+    rimandoNonValido: 'L\'indirizzo di ritorno della tua AI non è valido: il collegamento non si può completare.',
     troppiTentativi: 'Troppi tentativi: aspetta qualche minuto e riprova.',
     noAccount: 'Non c\'è un account MotorSage con questa email.',
     codiceNonInviato: 'Non è stato possibile mandare il codice: riprova fra poco.',
     codiceSbagliato: 'Il codice non è giusto o è scaduto.',
-    nonValida: 'Questa richiesta di collegamento non è più valida (scaduta o già usata): riparti dall\'assistente.',
-    giaAutorizzato: 'Collegamento già autorizzato: torno all\'assistente…',
-    rinnovo: 'Abbiamo sistemato i collegamenti scaduti o tolti: ricomincia il collegamento dal tuo assistente.',
-    nonControllato: 'Non è stato possibile controllare i tuoi collegamenti: riparti dall\'assistente fra poco.',
-    eliminazione: 'Il tuo account è in eliminazione: non si possono collegare assistenti.',
-    troppi: 'Hai già collegato 5 assistenti: scollegane uno da Impostazioni → Assistenti collegati e riprova.',
-    nonCollegato: 'Non è stato possibile collegare l\'assistente: riprova fra poco.',
-    nonCompletato: 'Non è stato possibile completare il collegamento: riparti dall\'assistente.',
+    nonValida: 'Questa richiesta di collegamento non è più valida (scaduta o già usata): riparti dalla tua AI.',
+    giaAutorizzato: 'Collegamento già autorizzato: torno alla tua AI…',
+    rinnovo: 'Abbiamo sistemato i collegamenti scaduti o tolti: ricomincia il collegamento dalla tua AI.',
+    nonControllato: 'Non è stato possibile controllare i tuoi collegamenti: riparti dalla tua AI fra poco.',
+    eliminazione: 'Il tuo account è in eliminazione: non si possono collegare AI.',
+    troppi: 'Hai già collegato 5 AI: scollegane una da Impostazioni → AI collegate e riprova.',
+    nonCollegato: 'Non è stato possibile collegare l\'AI: riprova fra poco.',
+    nonCompletato: 'Non è stato possibile completare il collegamento: riparti dalla tua AI.',
     nonAnnullato: 'Non è stato possibile annullare il collegamento: riprova fra poco.',
-    senzaNome: 'Un assistente senza nome',
   },
   en: {
-    titolo: 'Connect an assistant to MotorSage',
-    noscript: 'JavaScript is required to connect an assistant.',
+    titolo: 'Connect your AI to MotorSage',
+    titoloCon: 'Connect {nome} to MotorSage',
+    noscript: 'JavaScript is required to connect your AI.',
+    passoEmail: 'Email', passoCodice: 'Code', passoConferma: 'Confirm',
     emailIntro: 'Sign in with the email of your MotorSage account: we will send you a code.',
     email: 'Email', mandaCodice: 'Send me the code',
     codiceMandato: 'We sent a code to', codice: 'Code', entra: 'Sign in',
     altraEmail: 'Use a different email',
     vuole: '{nome} wants to connect to your MotorSage account.',
     sito: 'You will be connecting to:',
-    soloSeTuo: 'Only connect if you added MotorSage\'s address to your assistant yourself, just now.',
-    sconosciuto: 'Warning: this site is not one of the assistants we know. Only connect if the connection started from an assistant you trust.',
+    soloSeTuo: 'Only connect if you started the connection yourself, just now, from the MotorSage app or from your AI.',
+    soloLettura: '{nome} will only be able to read. You can disconnect it any time from Settings → Connected AI.',
+    vuoleSenzaNome: 'An unnamed AI wants to connect to your MotorSage account.',
+    soloLetturaSenzaNome: 'It will only be able to read. You can disconnect it any time from Settings → Connected AI.',
+    passi: 'Steps',
+    sconosciuto: 'Warning: this site is not one of the AIs we know. Only connect if the connection started from an AI you trust.',
     livelli: 'What it will be able to do', lettura: 'Read only',
     letturaDesc: 'It can read vehicles, expenses, deadlines, documents, profile and preferences. It cannot change anything.',
     aggiunte: 'Read and add', completo: 'Full', inArrivo: 'Coming soon',
-    privacy: 'What the assistant reads also passes through its provider (for example Anthropic for Claude, OpenAI for ChatGPT), under that provider\'s rules.',
+    privacy: 'What the AI reads also passes through its provider (for example Anthropic for Claude, OpenAI for ChatGPT), under that provider\'s rules.',
     account: 'Account:', collega: 'Connect', annulla: 'Cancel',
     attendi: 'One moment…', invio: 'Sending the code…', controllo: 'Checking the code…',
-    leggo: 'Reading the assistant\'s request…', collego: 'Connecting the assistant…', annullo: 'Cancelling…',
-    fatto: 'Done: going back to the assistant…', annullato: 'Connection cancelled: going back to the assistant…',
-    nonAperta: 'This page opens from the assistant, when you add MotorSage to its connectors.',
+    leggo: 'Reading your AI\'s request…', collego: 'Connecting your AI…', annullo: 'Cancelling…',
+    fatto: 'Done: going back to your AI…', annullato: 'Connection cancelled: going back to your AI…',
+    nonAperta: 'This page opens from the AI, when you add MotorSage to its connectors.',
     nonCaricata: 'The page did not load completely: reload it.',
-    rimandoNonValido: 'The assistant\'s return address is not valid: the connection cannot be completed.',
+    rimandoNonValido: 'Your AI\'s return address is not valid: the connection cannot be completed.',
     troppiTentativi: 'Too many attempts: wait a few minutes and try again.',
     noAccount: 'There is no MotorSage account with this email.',
     codiceNonInviato: 'The code could not be sent: try again shortly.',
     codiceSbagliato: 'The code is wrong or has expired.',
-    nonValida: 'This connection request is no longer valid (expired or already used): start again from the assistant.',
-    giaAutorizzato: 'Connection already authorized: going back to the assistant…',
-    rinnovo: 'We have cleaned up expired or removed connections: start the connection again from your assistant.',
-    nonControllato: 'Your connections could not be checked: start again from the assistant shortly.',
-    eliminazione: 'Your account is being deleted: assistants cannot be connected.',
-    troppi: 'You have already connected 5 assistants: disconnect one in Settings → Connected assistants and try again.',
-    nonCollegato: 'The assistant could not be connected: try again shortly.',
-    nonCompletato: 'The connection could not be completed: start again from the assistant.',
+    nonValida: 'This connection request is no longer valid (expired or already used): start again from your AI.',
+    giaAutorizzato: 'Connection already authorized: going back to your AI…',
+    rinnovo: 'We have cleaned up expired or removed connections: start the connection again from your AI.',
+    nonControllato: 'Your connections could not be checked: start again from your AI shortly.',
+    eliminazione: 'Your account is being deleted: AIs cannot be connected.',
+    troppi: 'You have already connected 5 AIs: disconnect one in Settings → Connected AI and try again.',
+    nonCollegato: 'The AI could not be connected: try again shortly.',
+    nonCompletato: 'The connection could not be completed: start again from your AI.',
     nonAnnullato: 'The connection could not be cancelled: try again shortly.',
-    senzaNome: 'An unnamed assistant',
   },
   de: {
-    titolo: 'Verbinde einen Assistenten mit MotorSage',
-    noscript: 'Um einen Assistenten zu verbinden, wird JavaScript benötigt.',
+    titolo: 'Verbinde deine KI mit MotorSage',
+    titoloCon: 'Verbinde {nome} mit MotorSage',
+    noscript: 'Um deine KI zu verbinden, wird JavaScript benötigt.',
+    passoEmail: 'E-Mail', passoCodice: 'Code', passoConferma: 'Bestätigen',
     emailIntro: 'Melde dich mit der E-Mail-Adresse deines MotorSage-Kontos an: Wir schicken dir einen Code.',
     email: 'E-Mail', mandaCodice: 'Code an mich senden',
     codiceMandato: 'Wir haben einen Code gesendet an', codice: 'Code', entra: 'Anmelden',
     altraEmail: 'Andere E-Mail-Adresse verwenden',
     vuole: '{nome} möchte sich mit deinem MotorSage-Konto verbinden.',
     sito: 'Du wirst verbunden mit:',
-    soloSeTuo: 'Verbinde nur, wenn du die Adresse von MotorSage gerade eben selbst in deinem Assistenten hinzugefügt hast.',
-    sconosciuto: 'Achtung: Diese Seite gehört nicht zu den Assistenten, die wir kennen. Verbinde nur, wenn die Verbindung von einem Assistenten ausging, dem du vertraust.',
-    livelli: 'Was der Assistent tun darf', lettura: 'Nur Lesen',
+    soloSeTuo: 'Verbinde nur, wenn du die Verbindung gerade eben selbst gestartet hast, in der MotorSage-App oder in deiner KI.',
+    soloLettura: '{nome} darf nur lesen. Du kannst die Verbindung jederzeit unter Einstellungen → Verbundene KI trennen.',
+    vuoleSenzaNome: 'Eine KI ohne Namen möchte sich mit deinem MotorSage-Konto verbinden.',
+    soloLetturaSenzaNome: 'Sie darf nur lesen. Du kannst die Verbindung jederzeit unter Einstellungen → Verbundene KI trennen.',
+    passi: 'Schritte',
+    sconosciuto: 'Achtung: Diese Seite gehört nicht zu den KIs, die wir kennen. Verbinde nur, wenn die Verbindung von einer KI ausging, der du vertraust.',
+    livelli: 'Was die KI tun darf', lettura: 'Nur Lesen',
     letturaDesc: 'Kann Fahrzeuge, Ausgaben, Termine, Dokumente, Profil und Einstellungen lesen. Kann nichts ändern.',
     aggiunte: 'Lesen und Hinzufügen', completo: 'Vollzugriff', inArrivo: 'Bald verfügbar',
-    privacy: 'Was der Assistent liest, läuft auch über seinen Anbieter (z. B. Anthropic für Claude, OpenAI für ChatGPT) und unterliegt dessen Regeln.',
+    privacy: 'Was die KI liest, läuft auch über ihren Anbieter (z. B. Anthropic für Claude, OpenAI für ChatGPT) und unterliegt dessen Regeln.',
     account: 'Konto:', collega: 'Verbinden', annulla: 'Abbrechen',
     attendi: 'Einen Moment …', invio: 'Code wird gesendet …', controllo: 'Code wird geprüft …',
-    leggo: 'Die Anfrage des Assistenten wird gelesen …', collego: 'Der Assistent wird verbunden …', annullo: 'Wird abgebrochen …',
-    fatto: 'Fertig: zurück zum Assistenten …', annullato: 'Verbindung abgebrochen: zurück zum Assistenten …',
-    nonAperta: 'Diese Seite öffnet sich vom Assistenten aus, wenn du MotorSage zu seinen Konnektoren hinzufügst.',
+    leggo: 'Die Anfrage deiner KI wird gelesen …', collego: 'Deine KI wird verbunden …', annullo: 'Wird abgebrochen …',
+    fatto: 'Fertig: zurück zu deiner KI …', annullato: 'Verbindung abgebrochen: zurück zu deiner KI …',
+    nonAperta: 'Diese Seite öffnet sich von der KI aus, wenn du MotorSage zu ihren Konnektoren hinzufügst.',
     nonCaricata: 'Die Seite wurde nicht vollständig geladen: Lade sie neu.',
-    rimandoNonValido: 'Die Rücksprungadresse des Assistenten ist ungültig: Die Verbindung kann nicht abgeschlossen werden.',
+    rimandoNonValido: 'Die Rücksprungadresse deiner KI ist ungültig: Die Verbindung kann nicht abgeschlossen werden.',
     troppiTentativi: 'Zu viele Versuche: Warte ein paar Minuten und versuche es erneut.',
     noAccount: 'Es gibt kein MotorSage-Konto mit dieser E-Mail-Adresse.',
     codiceNonInviato: 'Der Code konnte nicht gesendet werden: Versuche es gleich noch einmal.',
     codiceSbagliato: 'Der Code ist falsch oder abgelaufen.',
-    nonValida: 'Diese Verbindungsanfrage ist nicht mehr gültig (abgelaufen oder schon verwendet): Starte erneut vom Assistenten aus.',
-    giaAutorizzato: 'Verbindung bereits autorisiert: zurück zum Assistenten …',
-    rinnovo: 'Wir haben abgelaufene oder entfernte Verbindungen bereinigt: Starte die Verbindung erneut von deinem Assistenten aus.',
-    nonControllato: 'Deine Verbindungen konnten nicht geprüft werden: Starte gleich noch einmal vom Assistenten aus.',
-    eliminazione: 'Dein Konto wird gerade gelöscht: Es können keine Assistenten verbunden werden.',
-    troppi: 'Du hast schon 5 Assistenten verbunden: Trenne einen unter Einstellungen → Verbundene Assistenten und versuche es erneut.',
-    nonCollegato: 'Der Assistent konnte nicht verbunden werden: Versuche es gleich noch einmal.',
-    nonCompletato: 'Die Verbindung konnte nicht abgeschlossen werden: Starte erneut vom Assistenten aus.',
+    nonValida: 'Diese Verbindungsanfrage ist nicht mehr gültig (abgelaufen oder schon verwendet): Starte erneut von deiner KI aus.',
+    giaAutorizzato: 'Verbindung bereits autorisiert: zurück zu deiner KI …',
+    rinnovo: 'Wir haben abgelaufene oder entfernte Verbindungen bereinigt: Starte die Verbindung erneut von deiner KI aus.',
+    nonControllato: 'Deine Verbindungen konnten nicht geprüft werden: Starte gleich noch einmal von deiner KI aus.',
+    eliminazione: 'Dein Konto wird gerade gelöscht: Es können keine KIs verbunden werden.',
+    troppi: 'Du hast schon 5 KIs verbunden: Trenne eine unter Einstellungen → Verbundene KI und versuche es erneut.',
+    nonCollegato: 'Die KI konnte nicht verbunden werden: Versuche es gleich noch einmal.',
+    nonCompletato: 'Die Verbindung konnte nicht abgeschlossen werden: Starte erneut von deiner KI aus.',
     nonAnnullato: 'Die Verbindung konnte nicht abgebrochen werden: Versuche es gleich noch einmal.',
-    senzaNome: 'Ein Assistent ohne Namen',
   },
   pl: {
-    titolo: 'Połącz asystenta z MotorSage',
-    noscript: 'Aby połączyć asystenta, potrzebny jest JavaScript.',
+    titolo: 'Połącz swoją AI z MotorSage',
+    titoloCon: 'Połącz {nome} z MotorSage',
+    noscript: 'Aby połączyć swoją AI, potrzebny jest JavaScript.',
+    passoEmail: 'E-mail', passoCodice: 'Kod', passoConferma: 'Potwierdzenie',
     emailIntro: 'Zaloguj się adresem e-mail swojego konta MotorSage: wyślemy Ci kod.',
     email: 'E-mail', mandaCodice: 'Wyślij mi kod',
     codiceMandato: 'Wysłaliśmy kod na adres', codice: 'Kod', entra: 'Zaloguj',
     altraEmail: 'Użyj innego adresu e-mail',
     vuole: '{nome} chce się połączyć z Twoim kontem MotorSage.',
     sito: 'Połączysz się z:',
-    soloSeTuo: 'Połącz tylko wtedy, gdy adres MotorSage został dodany do asystenta przez ciebie, przed chwilą.',
-    sconosciuto: 'Uwaga: tej strony nie ma wśród znanych nam asystentów. Połącz tylko wtedy, gdy połączenie zostało rozpoczęte z asystenta, któremu ufasz.',
-    livelli: 'Co będzie mógł robić', lettura: 'Tylko odczyt',
+    soloSeTuo: 'Połącz tylko wtedy, gdy połączenie zostało rozpoczęte przez Ciebie, przed chwilą, w aplikacji MotorSage lub w Twojej AI.',
+    soloLettura: '{nome} będzie mogła tylko odczytywać dane. Możesz ją odłączyć w każdej chwili w Ustawienia → Połączone AI.',
+    vuoleSenzaNome: 'AI bez nazwy chce się połączyć z Twoim kontem MotorSage.',
+    soloLetturaSenzaNome: 'Będzie mogła tylko odczytywać dane. Możesz ją odłączyć w każdej chwili w Ustawienia → Połączone AI.',
+    passi: 'Kroki',
+    sconosciuto: 'Uwaga: tej strony nie ma wśród znanych nam AI. Połącz tylko wtedy, gdy połączenie zostało rozpoczęte z AI, której ufasz.',
+    livelli: 'Co będzie mogła robić', lettura: 'Tylko odczyt',
     letturaDesc: 'Może odczytywać pojazdy, wydatki, terminy, dokumenty, profil i preferencje. Niczego nie może zmieniać.',
     aggiunte: 'Odczyt i dodawanie', completo: 'Pełny dostęp', inArrivo: 'Wkrótce',
-    privacy: 'To, co asystent odczytuje, przechodzi także przez jego dostawcę (na przykład Anthropic dla Claude, OpenAI dla ChatGPT), zgodnie z zasadami tego dostawcy.',
+    privacy: 'To, co AI odczytuje, przechodzi także przez jej dostawcę (na przykład Anthropic dla Claude, OpenAI dla ChatGPT), zgodnie z zasadami tego dostawcy.',
     account: 'Konto:', collega: 'Połącz', annulla: 'Anuluj',
     attendi: 'Chwileczkę…', invio: 'Wysyłam kod…', controllo: 'Sprawdzam kod…',
-    leggo: 'Odczytuję prośbę asystenta…', collego: 'Łączę asystenta…', annullo: 'Anuluję…',
-    fatto: 'Gotowe: wracam do asystenta…', annullato: 'Połączenie anulowane: wracam do asystenta…',
-    nonAperta: 'Ta strona otwiera się z poziomu asystenta, gdy dodajesz MotorSage do jego konektorów.',
+    leggo: 'Odczytuję prośbę Twojej AI…', collego: 'Łączę Twoją AI…', annullo: 'Anuluję…',
+    fatto: 'Gotowe: wracam do Twojej AI…', annullato: 'Połączenie anulowane: wracam do Twojej AI…',
+    nonAperta: 'Ta strona otwiera się z poziomu AI, gdy dodajesz MotorSage do jej konektorów.',
     nonCaricata: 'Strona nie wczytała się w całości: odśwież ją.',
-    rimandoNonValido: 'Adres powrotu asystenta jest nieprawidłowy: nie można dokończyć połączenia.',
+    rimandoNonValido: 'Adres powrotu Twojej AI jest nieprawidłowy: nie można dokończyć połączenia.',
     troppiTentativi: 'Zbyt wiele prób: poczekaj kilka minut i spróbuj ponownie.',
     noAccount: 'Nie ma konta MotorSage z tym adresem e-mail.',
     codiceNonInviato: 'Nie udało się wysłać kodu: spróbuj za chwilę.',
     codiceSbagliato: 'Kod jest nieprawidłowy lub wygasł.',
-    nonValida: 'Ta prośba o połączenie jest już nieważna (wygasła lub została użyta): zacznij od nowa w asystencie.',
-    giaAutorizzato: 'Połączenie jest już autoryzowane: wracam do asystenta…',
-    rinnovo: 'Uporządkowaliśmy wygasłe lub usunięte połączenia: rozpocznij połączenie od nowa w swoim asystencie.',
-    nonControllato: 'Nie udało się sprawdzić Twoich połączeń: zacznij od nowa w asystencie za chwilę.',
-    eliminazione: 'Twoje konto jest w trakcie usuwania: nie można łączyć asystentów.',
-    troppi: 'Masz już połączonych 5 asystentów: odłącz jednego w Ustawienia → Połączeni asystenci i spróbuj ponownie.',
-    nonCollegato: 'Nie udało się połączyć asystenta: spróbuj za chwilę.',
-    nonCompletato: 'Nie udało się dokończyć połączenia: zacznij od nowa w asystencie.',
+    nonValida: 'Ta prośba o połączenie jest już nieważna (wygasła lub została użyta): zacznij od nowa w swojej AI.',
+    giaAutorizzato: 'Połączenie jest już autoryzowane: wracam do Twojej AI…',
+    rinnovo: 'Uporządkowaliśmy wygasłe lub usunięte połączenia: rozpocznij połączenie od nowa w swojej AI.',
+    nonControllato: 'Nie udało się sprawdzić Twoich połączeń: zacznij od nowa w swojej AI za chwilę.',
+    eliminazione: 'Twoje konto jest w trakcie usuwania: nie można łączyć AI.',
+    troppi: 'Masz już połączonych 5 AI: odłącz jedną w Ustawienia → Połączone AI i spróbuj ponownie.',
+    nonCollegato: 'Nie udało się połączyć AI: spróbuj za chwilę.',
+    nonCompletato: 'Nie udało się dokończyć połączenia: zacznij od nowa w swojej AI.',
     nonAnnullato: 'Nie udało się anulować połączenia: spróbuj za chwilę.',
-    senzaNome: 'Asystent bez nazwy',
   },
   el: {
-    titolo: 'Σύνδεσε έναν βοηθό με το MotorSage',
-    noscript: 'Για να συνδέσεις έναν βοηθό χρειάζεται JavaScript.',
+    titolo: 'Σύνδεσε την AI σου με το MotorSage',
+    titoloCon: 'Σύνδεσε το {nome} με το MotorSage',
+    noscript: 'Για να συνδέσεις την AI σου χρειάζεται JavaScript.',
+    passoEmail: 'Email', passoCodice: 'Κωδικός', passoConferma: 'Επιβεβαίωση',
     emailIntro: 'Συνδέσου με το email του λογαριασμού σου στο MotorSage: θα σου στείλουμε έναν κωδικό.',
     email: 'Email', mandaCodice: 'Στείλε μου τον κωδικό',
     codiceMandato: 'Στείλαμε έναν κωδικό στο', codice: 'Κωδικός', entra: 'Είσοδος',
     altraEmail: 'Χρήση άλλου email',
-    vuole: 'Ο βοηθός {nome} θέλει να συνδεθεί με τον λογαριασμό σου στο MotorSage.',
+    vuole: 'Η AI {nome} θέλει να συνδεθεί με τον λογαριασμό σου στο MotorSage.',
     sito: 'Θα συνδεθείς με:',
-    soloSeTuo: 'Σύνδεσε μόνο αν τη διεύθυνση του MotorSage την πρόσθεσες εσύ, μόλις τώρα, στον βοηθό σου.',
-    sconosciuto: 'Προσοχή: αυτός ο ιστότοπος δεν είναι ανάμεσα στους βοηθούς που γνωρίζουμε. Συνέχισε μόνο αν η σύνδεση ξεκίνησε από βοηθό που εμπιστεύεσαι.',
+    soloSeTuo: 'Σύνδεσε μόνο αν ξεκίνησες εσύ τη σύνδεση, μόλις τώρα, από την εφαρμογή MotorSage ή από την AI σου.',
+    soloLettura: 'Το {nome} θα μπορεί μόνο να διαβάζει. Μπορείς να το αποσυνδέσεις όποτε θέλεις από Ρυθμίσεις → Συνδεδεμένες AI.',
+    vuoleSenzaNome: 'Μια AI χωρίς όνομα θέλει να συνδεθεί με τον λογαριασμό σου στο MotorSage.',
+    soloLetturaSenzaNome: 'Θα μπορεί μόνο να διαβάζει. Μπορείς να την αποσυνδέσεις όποτε θέλεις από Ρυθμίσεις → Συνδεδεμένες AI.',
+    passi: 'Βήματα',
+    sconosciuto: 'Προσοχή: αυτός ο ιστότοπος δεν είναι ανάμεσα στις AI που γνωρίζουμε. Συνέχισε μόνο αν η σύνδεση ξεκίνησε από AI που εμπιστεύεσαι.',
     livelli: 'Τι θα μπορεί να κάνει', lettura: 'Μόνο ανάγνωση',
     letturaDesc: 'Μπορεί να διαβάζει οχήματα, έξοδα, προθεσμίες, έγγραφα, προφίλ και προτιμήσεις. Δεν μπορεί να αλλάξει τίποτα.',
     aggiunte: 'Ανάγνωση και προσθήκες', completo: 'Πλήρης', inArrivo: 'Σύντομα',
-    privacy: 'Όσα διαβάζει ο βοηθός περνούν και από τον πάροχό του (για παράδειγμα Anthropic για το Claude, OpenAI για το ChatGPT), σύμφωνα με τους κανόνες του παρόχου.',
+    privacy: 'Όσα διαβάζει η AI περνούν και από τον πάροχό της (για παράδειγμα Anthropic για το Claude, OpenAI για το ChatGPT), σύμφωνα με τους κανόνες του παρόχου.',
     account: 'Λογαριασμός:', collega: 'Σύνδεση', annulla: 'Ακύρωση',
     attendi: 'Μια στιγμή…', invio: 'Στέλνω τον κωδικό…', controllo: 'Ελέγχω τον κωδικό…',
-    leggo: 'Διαβάζω το αίτημα του βοηθού…', collego: 'Συνδέω τον βοηθό…', annullo: 'Ακυρώνω…',
-    fatto: 'Έτοιμο: επιστρέφω στον βοηθό…', annullato: 'Η σύνδεση ακυρώθηκε: επιστρέφω στον βοηθό…',
-    nonAperta: 'Αυτή η σελίδα ανοίγει από τον βοηθό, όταν προσθέτεις το MotorSage στους συνδέσμους του.',
+    leggo: 'Διαβάζω το αίτημα της AI σου…', collego: 'Συνδέω την AI σου…', annullo: 'Ακυρώνω…',
+    fatto: 'Έτοιμο: επιστρέφω στην AI σου…', annullato: 'Η σύνδεση ακυρώθηκε: επιστρέφω στην AI σου…',
+    nonAperta: 'Αυτή η σελίδα ανοίγει από την AI, όταν προσθέτεις το MotorSage στους συνδέσμους της.',
     nonCaricata: 'Η σελίδα δεν φορτώθηκε πλήρως: φόρτωσέ την ξανά.',
-    rimandoNonValido: 'Η διεύθυνση επιστροφής του βοηθού δεν είναι έγκυρη: η σύνδεση δεν μπορεί να ολοκληρωθεί.',
+    rimandoNonValido: 'Η διεύθυνση επιστροφής της AI σου δεν είναι έγκυρη: η σύνδεση δεν μπορεί να ολοκληρωθεί.',
     troppiTentativi: 'Πάρα πολλές προσπάθειες: περίμενε λίγα λεπτά και ξαναδοκίμασε.',
     noAccount: 'Δεν υπάρχει λογαριασμός MotorSage με αυτό το email.',
     codiceNonInviato: 'Δεν στάλθηκε ο κωδικός: ξαναδοκίμασε σε λίγο.',
     codiceSbagliato: 'Ο κωδικός δεν είναι σωστός ή έχει λήξει.',
-    nonValida: 'Αυτό το αίτημα σύνδεσης δεν ισχύει πια (έληξε ή έχει ήδη χρησιμοποιηθεί): ξεκίνα ξανά από τον βοηθό.',
-    giaAutorizzato: 'Η σύνδεση έχει ήδη εγκριθεί: επιστρέφω στον βοηθό…',
-    rinnovo: 'Τακτοποιήσαμε τις συνδέσεις που είχαν λήξει ή αφαιρεθεί: ξεκίνα ξανά τη σύνδεση από τον βοηθό σου.',
-    nonControllato: 'Δεν ήταν δυνατός ο έλεγχος των συνδέσεών σου: ξεκίνα ξανά από τον βοηθό σε λίγο.',
-    eliminazione: 'Ο λογαριασμός σου βρίσκεται σε διαδικασία διαγραφής: δεν μπορούν να συνδεθούν βοηθοί.',
-    troppi: 'Έχεις ήδη συνδέσει 5 βοηθούς: αποσύνδεσε έναν από Ρυθμίσεις → Συνδεδεμένοι βοηθοί και ξαναδοκίμασε.',
-    nonCollegato: 'Δεν ήταν δυνατή η σύνδεση του βοηθού: ξαναδοκίμασε σε λίγο.',
-    nonCompletato: 'Δεν ήταν δυνατή η ολοκλήρωση της σύνδεσης: ξεκίνα ξανά από τον βοηθό.',
+    nonValida: 'Αυτό το αίτημα σύνδεσης δεν ισχύει πια (έληξε ή έχει ήδη χρησιμοποιηθεί): ξεκίνα ξανά από την AI σου.',
+    giaAutorizzato: 'Η σύνδεση έχει ήδη εγκριθεί: επιστρέφω στην AI σου…',
+    rinnovo: 'Τακτοποιήσαμε τις συνδέσεις που είχαν λήξει ή αφαιρεθεί: ξεκίνα ξανά τη σύνδεση από την AI σου.',
+    nonControllato: 'Δεν ήταν δυνατός ο έλεγχος των συνδέσεών σου: ξεκίνα ξανά από την AI σου σε λίγο.',
+    eliminazione: 'Ο λογαριασμός σου βρίσκεται σε διαδικασία διαγραφής: δεν μπορούν να συνδεθούν AI.',
+    troppi: 'Έχεις ήδη συνδέσει 5 AI: αποσύνδεσε μία από Ρυθμίσεις → Συνδεδεμένες AI και ξαναδοκίμασε.',
+    nonCollegato: 'Δεν ήταν δυνατή η σύνδεση της AI: ξαναδοκίμασε σε λίγο.',
+    nonCompletato: 'Δεν ήταν δυνατή η ολοκλήρωση της σύνδεσης: ξεκίνα ξανά από την AI σου.',
     nonAnnullato: 'Δεν ήταν δυνατή η ακύρωση της σύνδεσης: ξαναδοκίμασε σε λίγο.',
-    senzaNome: 'Ένας βοηθός χωρίς όνομα',
   },
 };
 
@@ -415,8 +437,15 @@ function messaggio(testo, errore = false) {
   $('messaggio').classList.toggle('errore', errore);
 }
 
+// Schermata mostrata e passo corrente nella riga «1 Email · 2 Codice · 3 Conferma».
+const PASSO_DI = { 'modulo-email': 1, 'modulo-codice': 2, consenso: 3 };
 function mostra(id) {
   for (const s of ['modulo-email', 'modulo-codice', 'consenso']) $(s).hidden = s !== id;
+  for (const n of [1, 2, 3]) {
+    const passo = $('passo-' + n);
+    if (PASSO_DI[id] === n) passo.setAttribute('aria-current', 'step');
+    else passo.removeAttribute('aria-current');
+  }
 }
 
 function blocca(sì) {
@@ -427,6 +456,7 @@ function traduci() {
   document.documentElement.lang = LINGUA;
   document.title = T.titolo;
   for (const el of document.querySelectorAll('[data-t]')) el.textContent = T[el.dataset.t];
+  for (const el of document.querySelectorAll('[data-aria]')) el.setAttribute('aria-label', T[el.dataset.aria]);
 }
 
 // Gli schemi pericolosi li rifiuta già il server di accesso quando un client
@@ -461,10 +491,22 @@ function sitoLeggibile(uri) {
   }
 }
 
+// Titolo della pagina: «Collega {nome} a MotorSage» col nome dell'AI già
+// ripulito (nomePulito), sempre come testo; senza nome resta quello generico.
+function scriviTitolo(nome) {
+  const titolo = nome ? T.titoloCon.split('{nome}').join(nome) : T.titolo;
+  $('titolo').textContent = titolo;
+  document.title = titolo;
+}
+
 // «{nome} vuole collegarsi…»: il nome in grassetto, sempre come testo.
 function scriviVuole(nome) {
-  const [prima, dopo] = T.vuole.split('{nome}');
   const p = $('vuole');
+  if (!nome) {
+    p.textContent = T.vuoleSenzaNome;
+    return;
+  }
+  const [prima, dopo] = T.vuole.split('{nome}');
   p.textContent = prima;
   const n = document.createElement('span');
   n.className = 'nome';
@@ -538,7 +580,7 @@ $('modulo-codice').addEventListener('submit', async (evento) => {
 
 // Il server di accesso approva da solo se c'è già un consenso attivo, e allora
 // non rimanda più i dettagli: il collegamento non passerebbe da
-// collega-assistente. Prima di tornare all'assistente si revocano i consensi
+// collega-assistente. Prima di tornare all'AI si revocano i consensi
 // senza collegamento (scollegati dall'app) o scaduti (90 giorni), con la
 // sessione della persona. Restituisce quanti ne ha revocati; lancia se non
 // riesce a controllare.
@@ -590,7 +632,15 @@ async function caricaDettagli() {
     vaiA(data.redirect_url);
     return;
   }
-  scriviVuole(nomePulito(data.client && data.client.name) || T.senzaNome);
+  const nomeAi = nomePulito(data.client && data.client.name);
+  // Il nome compare nel titolo solo per i siti noti: per gli altri il titolo
+  // resta generico, così un'AI sconosciuta non si presenta con un nome suo.
+  const noto = sitoNoto(data.redirect_uri);
+  scriviTitolo(noto ? nomeAi : '');
+  scriviVuole(nomeAi);
+  $('solo-lettura').textContent = nomeAi
+    ? T.soloLettura.split('{nome}').join(nomeAi)
+    : T.soloLetturaSenzaNome;
   $('sito').textContent = sitoLeggibile(data.redirect_uri);
   $('sconosciuto').hidden = sitoNoto(data.redirect_uri);
   $('account').textContent = (data.user && data.user.email) || email;
