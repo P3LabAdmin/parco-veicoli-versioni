@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js 'sha256-E/tiKBTqKv7tENep2iuLtRUZQaH84TnX9y3+dgmEdh0='; style-src 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src https://bavuvoghfzleutkwwhxg.supabase.co; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js 'sha256-ESjMNZEEhuP1+vqNs9a4G4RRllgVpnp5cP/8fQJ0Ghg='; style-src 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src https://bavuvoghfzleutkwwhxg.supabase.co; base-uri 'none'; form-action 'none'">
 <title>MotorSage · Collega la tua AI</title>
 <!--
   Pagina di consenso del server OAuth di Supabase: ci arriva chi aggiunge
@@ -202,6 +202,7 @@ const TESTI = {
     nonValida: 'Questa richiesta di collegamento non è più valida (scaduta o già usata): riparti dalla tua AI.',
     giaAutorizzato: 'Collegamento già autorizzato: torno alla tua AI…',
     rinnovo: 'Abbiamo sistemato i collegamenti scaduti o tolti: ricomincia il collegamento dalla tua AI.',
+    sitoDiverso: 'Questa AI chiede di tornare a un sito diverso da quello che hai collegato: per sicurezza non proseguo. Scollegala dall’app e collegala di nuovo.',
     nonControllato: 'Non è stato possibile controllare i tuoi collegamenti: riparti dalla tua AI fra poco.',
     eliminazione: 'Il tuo account è in eliminazione: non si possono collegare AI.',
     troppi: 'Hai già collegato 5 AI: scollegane una da Impostazioni → AI collegate e riprova.',
@@ -244,6 +245,7 @@ const TESTI = {
     nonValida: 'This connection request is no longer valid (expired or already used): start again from your AI.',
     giaAutorizzato: 'Connection already authorized: going back to your AI…',
     rinnovo: 'We have cleaned up expired or removed connections: start the connection again from your AI.',
+    sitoDiverso: 'This AI is asking to return to a different site from the one you connected: for safety I won’t continue. Disconnect it in the app and connect it again.',
     nonControllato: 'Your connections could not be checked: start again from your AI shortly.',
     eliminazione: 'Your account is being deleted: AIs cannot be connected.',
     troppi: 'You have already connected 5 AIs: disconnect one in Settings → Connected AI and try again.',
@@ -286,6 +288,7 @@ const TESTI = {
     nonValida: 'Diese Verbindungsanfrage ist nicht mehr gültig (abgelaufen oder schon verwendet): Starte erneut von deiner KI aus.',
     giaAutorizzato: 'Verbindung bereits autorisiert: zurück zu deiner KI …',
     rinnovo: 'Wir haben abgelaufene oder entfernte Verbindungen bereinigt: Starte die Verbindung erneut von deiner KI aus.',
+    sitoDiverso: 'Diese KI möchte zu einer anderen Website zurückkehren als der, die du verbunden hast: Aus Sicherheitsgründen mache ich nicht weiter. Trenne sie in der App und verbinde sie erneut.',
     nonControllato: 'Deine Verbindungen konnten nicht geprüft werden: Starte gleich noch einmal von deiner KI aus.',
     eliminazione: 'Dein Konto wird gerade gelöscht: Es können keine KIs verbunden werden.',
     troppi: 'Du hast schon 5 KIs verbunden: Trenne eine unter Einstellungen → Verbundene KI und versuche es erneut.',
@@ -328,6 +331,7 @@ const TESTI = {
     nonValida: 'Ta prośba o połączenie jest już nieważna (wygasła lub została użyta): zacznij od nowa w swojej AI.',
     giaAutorizzato: 'Połączenie jest już autoryzowane: wracam do Twojej AI…',
     rinnovo: 'Uporządkowaliśmy wygasłe lub usunięte połączenia: rozpocznij połączenie od nowa w swojej AI.',
+    sitoDiverso: 'Ta AI chce wrócić na inną stronę niż ta, którą połączyłeś: ze względów bezpieczeństwa nie kontynuuję. Odłącz ją w aplikacji i połącz ponownie.',
     nonControllato: 'Nie udało się sprawdzić Twoich połączeń: zacznij od nowa w swojej AI za chwilę.',
     eliminazione: 'Twoje konto jest w trakcie usuwania: nie można łączyć AI.',
     troppi: 'Masz już połączonych 5 AI: odłącz jedną w Ustawienia → Połączone AI i spróbuj ponownie.',
@@ -370,6 +374,7 @@ const TESTI = {
     nonValida: 'Αυτό το αίτημα σύνδεσης δεν ισχύει πια (έληξε ή έχει ήδη χρησιμοποιηθεί): ξεκίνα ξανά από την AI σου.',
     giaAutorizzato: 'Η σύνδεση έχει ήδη εγκριθεί: επιστρέφω στην AI σου…',
     rinnovo: 'Τακτοποιήσαμε τις συνδέσεις που είχαν λήξει ή αφαιρεθεί: ξεκίνα ξανά τη σύνδεση από την AI σου.',
+    sitoDiverso: 'Αυτή η AI ζητά να επιστρέψει σε διαφορετικό ιστότοπο από αυτόν που συνέδεσες: για ασφάλεια δεν συνεχίζω. Αποσύνδεσέ την από την εφαρμογή και σύνδεσέ την ξανά.',
     nonControllato: 'Δεν ήταν δυνατός ο έλεγχος των συνδέσεών σου: ξεκίνα ξανά από την AI σου σε λίγο.',
     eliminazione: 'Ο λογαριασμός σου βρίσκεται σε διαδικασία διαγραφής: δεν μπορούν να συνδεθούν AI.',
     troppi: 'Έχεις ήδη συνδέσει 5 AI: αποσύνδεσε μία από Ρυθμίσεις → Συνδεδεμένες AI και ξαναδοκίμασε.',
@@ -410,6 +415,19 @@ function nomePulito(nome) {
   if (typeof nome !== 'string') return '';
   const pulito = nome.replace(/\s+/g, ' ').replace(/[\p{Cc}\p{Cf}]/gu, '').replace(/ {2,}/g, ' ').trim();
   return Array.from(pulito).slice(0, 40).join('').trim();
+}
+
+// _shared/collegamento.ts, sitoDelRimando e rimandoGiaApprovato: col
+// consenso già dato si torna solo a un sito dei collegamenti vivi (NV2).
+function sitoDelRimando(uri) {
+  let u;
+  try { u = new URL(uri); } catch { return null; }
+  if (!u.host) return null;
+  return u.protocol === 'https:' || u.protocol === 'http:' ? u.origin : u.protocol + '//' + u.host;
+}
+function rimandoGiaApprovato(redirectUrl, sitiCollegati) {
+  const sito = sitoDelRimando(redirectUrl);
+  return sito !== null && sitiCollegati.includes(sito);
 }
 
 // _shared/collegamento.ts, clientDaRevocare: i consensi senza riga di
@@ -580,12 +598,12 @@ $('modulo-codice').addEventListener('submit', async (evento) => {
 // non rimanda più i dettagli: il collegamento non passerebbe da
 // collega-assistente. Prima di tornare all'AI si revocano i consensi
 // senza collegamento (scollegati dall'app) o scaduti (90 giorni), con la
-// sessione della persona. Restituisce quanti ne ha revocati; lancia se non
-// riesce a controllare.
+// sessione della persona. Restituisce quanti ne ha revocati e i siti dei
+// collegamenti rimasti; lancia se non riesce a controllare.
 async function ripulisciConsensi() {
   const grants = await db.auth.oauth.listGrants();
   if (grants.error) throw grants.error;
-  const righe = await db.from('collegamenti_assistenti').select('client_id, ultimo_uso, creato_il');
+  const righe = await db.from('collegamenti_assistenti').select('client_id, ultimo_uso, creato_il, sito_rimando');
   if (righe.error) throw righe.error;
   const da = clientDaRevocare(
     (grants.data || []).map((g) => ({ clientId: g.client.id })),
@@ -596,7 +614,11 @@ async function ripulisciConsensi() {
     const esito = await db.auth.oauth.revokeGrant({ clientId });
     if (esito.error) throw esito.error;
   }
-  return da.length;
+  const revocati = new Set(da);
+  const siti = (righe.data || [])
+    .filter((r) => !revocati.has(r.client_id))
+    .map((r) => r.sito_rimando);
+  return { revocati: da.length, siti };
 }
 
 async function caricaDettagli() {
@@ -611,8 +633,9 @@ async function caricaDettagli() {
   }
   if (!data.authorization_id) {
     let revocati;
+    let siti;
     try {
-      revocati = await ripulisciConsensi();
+      ({ revocati, siti } = await ripulisciConsensi());
     } catch (e) {
       console.error('consensi', e && e.status, e && e.code);
       mostra(null);
@@ -623,6 +646,12 @@ async function caricaDettagli() {
     mostra(null);
     if (revocati > 0) {
       messaggio(T.rinnovo, true);
+      await chiudiSessione();
+      return;
+    }
+    if (!rimandoGiaApprovato(data.redirect_url, siti)) {
+      console.error('rimando a un sito non collegato');
+      messaggio(T.sitoDiverso, true);
       await chiudiSessione();
       return;
     }
