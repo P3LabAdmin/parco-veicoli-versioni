@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js 'sha256-BPC7XqbeGgWp7iUZoEZcYR7qLa5iqM/IzMo8xZZt2NM='; style-src 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src https://bavuvoghfzleutkwwhxg.supabase.co; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js 'sha256-iWjsOoojyEfiiQ79XWl4/hvqPVff3ltbl8WfOekM8k8='; style-src 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src https://bavuvoghfzleutkwwhxg.supabase.co; base-uri 'none'; form-action 'none'">
 <title>MotorSage · Collega la tua AI</title>
 <!--
   Pagina di consenso del server OAuth di Supabase: ci arriva chi aggiunge
@@ -141,7 +141,8 @@
       <p id="sconosciuto" class="avviso" role="alert" data-t="sconosciuto" hidden></p>
       <fieldset>
         <legend data-t="livelli"></legend>
-        <!-- I livelli di scrittura non esistono ancora: niente «In arrivo» (F8). -->
+        <!-- I livelli di scrittura si scelgono solo dall'app (decisione del 13/11/2026: un link
+             truffa non può ottenere la scrittura): qui sola lettura, con scritto dove alzarla. -->
         <label class="livello"><input type="radio" name="livello" value="lettura" checked>
           <strong data-t="lettura"></strong>
           <small data-t="letturaDesc"></small></label>
@@ -179,13 +180,13 @@ const TESTI = {
     vuole: '{nome} vuole collegarsi al tuo account MotorSage.',
     sito: 'Ti collegherai a:',
     soloSeTuo: 'Collega solo se hai avviato tu il collegamento, adesso, dall\'app MotorSage o dalla tua AI.',
-    soloLettura: '{nome} potrà solo leggere. La scolleghi quando vuoi da Impostazioni → AI collegate.',
+    soloLettura: '{nome} per ora potrà solo leggere: se vuoi che aggiunga o modifichi spese e scadenze, lo decidi tu dall\'app, in Impostazioni → AI collegate. Da lì la scolleghi anche quando vuoi.',
     vuoleSenzaNome: 'Un\'AI senza nome vuole collegarsi al tuo account MotorSage.',
-    soloLetturaSenzaNome: 'Potrà solo leggere. La scolleghi quando vuoi da Impostazioni → AI collegate.',
+    soloLetturaSenzaNome: 'Per ora potrà solo leggere: se vuoi che aggiunga o modifichi spese e scadenze, lo decidi tu dall\'app, in Impostazioni → AI collegate. Da lì la scolleghi anche quando vuoi.',
     passi: 'Passaggi',
     sconosciuto: 'Attenzione: questo sito non è fra quelli delle AI che conosciamo. Collega solo se il collegamento è partito da un\'AI di cui ti fidi.',
-    livelli: 'Cosa potrà fare', lettura: 'Sola lettura',
-    letturaDesc: 'Può leggere veicoli, spese, scadenze, documenti, profilo e preferenze. Non può cambiare nulla.',
+    livelli: 'Cosa potrà fare', lettura: 'Sola lettura, per iniziare',
+    letturaDesc: 'Può leggere veicoli, spese, scadenze, documenti, profilo e preferenze. Non cambia nulla finché non sei tu a permetterlo dall\'app: in Impostazioni → AI collegate puoi lasciarle aggiungere, modificare o eliminare spese e scadenze.',
     aggiunte: 'Lettura e aggiunte', completo: 'Completo', inArrivo: 'In arrivo',
     privacy: 'Quello che l\'AI legge passa anche dal suo fornitore (per esempio Anthropic per Claude, OpenAI per ChatGPT), secondo le regole di quel fornitore.',
     account: 'Account:', collega: 'Collega', annulla: 'Annulla',
@@ -222,13 +223,13 @@ const TESTI = {
     vuole: '{nome} wants to connect to your MotorSage account.',
     sito: 'You will be connecting to:',
     soloSeTuo: 'Only connect if you started the connection yourself, just now, from the MotorSage app or from your AI.',
-    soloLettura: '{nome} will only be able to read. You can disconnect it any time from Settings → Connected AI.',
+    soloLettura: '{nome} will only be able to read for now: if you want it to add or change expenses and deadlines, you decide that in the app, in Settings → Connected AI. You can also disconnect it from there any time.',
     vuoleSenzaNome: 'An unnamed AI wants to connect to your MotorSage account.',
-    soloLetturaSenzaNome: 'It will only be able to read. You can disconnect it any time from Settings → Connected AI.',
+    soloLetturaSenzaNome: 'It will only be able to read for now: if you want it to add or change expenses and deadlines, you decide that in the app, in Settings → Connected AI. You can also disconnect it from there any time.',
     passi: 'Steps',
     sconosciuto: 'Warning: this site is not one of the AIs we know. Only connect if the connection started from an AI you trust.',
-    livelli: 'What it will be able to do', lettura: 'Read only',
-    letturaDesc: 'It can read vehicles, expenses, deadlines, documents, profile and preferences. It cannot change anything.',
+    livelli: 'What it will be able to do', lettura: 'Read only, to start with',
+    letturaDesc: 'It can read vehicles, expenses, deadlines, documents, profile and preferences. It changes nothing until you allow it from the app: in Settings → Connected AI you can let it add, change or delete expenses and deadlines.',
     aggiunte: 'Read and add', completo: 'Full', inArrivo: 'Coming soon',
     privacy: 'What the AI reads also passes through its provider (for example Anthropic for Claude, OpenAI for ChatGPT), under that provider\'s rules.',
     account: 'Account:', collega: 'Connect', annulla: 'Cancel',
@@ -265,13 +266,13 @@ const TESTI = {
     vuole: '{nome} möchte sich mit deinem MotorSage-Konto verbinden.',
     sito: 'Du wirst verbunden mit:',
     soloSeTuo: 'Verbinde nur, wenn du die Verbindung gerade eben selbst gestartet hast, in der MotorSage-App oder in deiner KI.',
-    soloLettura: '{nome} darf nur lesen. Du kannst die Verbindung jederzeit unter Einstellungen → Verbundene KI trennen.',
+    soloLettura: '{nome} darf vorerst nur lesen: Ob sie Ausgaben und Termine hinzufügen oder ändern darf, entscheidest du in der App unter Einstellungen → Verbundene KI. Dort kannst du die Verbindung auch jederzeit trennen.',
     vuoleSenzaNome: 'Eine KI ohne Namen möchte sich mit deinem MotorSage-Konto verbinden.',
-    soloLetturaSenzaNome: 'Sie darf nur lesen. Du kannst die Verbindung jederzeit unter Einstellungen → Verbundene KI trennen.',
+    soloLetturaSenzaNome: 'Sie darf vorerst nur lesen: Ob sie Ausgaben und Termine hinzufügen oder ändern darf, entscheidest du in der App unter Einstellungen → Verbundene KI. Dort kannst du die Verbindung auch jederzeit trennen.',
     passi: 'Schritte',
     sconosciuto: 'Achtung: Diese Seite gehört nicht zu den KIs, die wir kennen. Verbinde nur, wenn die Verbindung von einer KI ausging, der du vertraust.',
-    livelli: 'Was die KI tun darf', lettura: 'Nur Lesen',
-    letturaDesc: 'Kann Fahrzeuge, Ausgaben, Termine, Dokumente, Profil und Einstellungen lesen. Kann nichts ändern.',
+    livelli: 'Was die KI tun darf', lettura: 'Zunächst nur Lesen',
+    letturaDesc: 'Kann Fahrzeuge, Ausgaben, Termine, Dokumente, Profil und Einstellungen lesen. Sie ändert nichts, bis du es in der App erlaubst: Unter Einstellungen → Verbundene KI kannst du ihr erlauben, Ausgaben und Termine hinzuzufügen, zu ändern oder zu löschen.',
     aggiunte: 'Lesen und Hinzufügen', completo: 'Vollzugriff', inArrivo: 'Bald verfügbar',
     privacy: 'Was die KI liest, läuft auch über ihren Anbieter (z. B. Anthropic für Claude, OpenAI für ChatGPT) und unterliegt dessen Regeln.',
     account: 'Konto:', collega: 'Verbinden', annulla: 'Abbrechen',
@@ -308,13 +309,13 @@ const TESTI = {
     vuole: '{nome} chce się połączyć z Twoim kontem MotorSage.',
     sito: 'Połączysz się z:',
     soloSeTuo: 'Połącz tylko wtedy, gdy połączenie zostało rozpoczęte przez Ciebie, przed chwilą, w aplikacji MotorSage lub w Twojej AI.',
-    soloLettura: '{nome} będzie mogła tylko odczytywać dane. Możesz ją odłączyć w każdej chwili w Ustawienia → Połączone AI.',
+    soloLettura: '{nome} na razie będzie mogła tylko odczytywać dane: czy ma dodawać lub zmieniać wydatki i terminy, decydujesz w aplikacji, w Ustawieniach → Połączone AI. Tam też możesz ją w każdej chwili odłączyć.',
     vuoleSenzaNome: 'AI bez nazwy chce się połączyć z Twoim kontem MotorSage.',
-    soloLetturaSenzaNome: 'Będzie mogła tylko odczytywać dane. Możesz ją odłączyć w każdej chwili w Ustawienia → Połączone AI.',
+    soloLetturaSenzaNome: 'Na razie będzie mogła tylko odczytywać dane: czy ma dodawać lub zmieniać wydatki i terminy, decydujesz w aplikacji, w Ustawieniach → Połączone AI. Tam też możesz ją w każdej chwili odłączyć.',
     passi: 'Kroki',
     sconosciuto: 'Uwaga: tej strony nie ma wśród znanych nam AI. Połącz tylko wtedy, gdy połączenie zostało rozpoczęte z AI, której ufasz.',
-    livelli: 'Co będzie mogła robić', lettura: 'Tylko odczyt',
-    letturaDesc: 'Może odczytywać pojazdy, wydatki, terminy, dokumenty, profil i preferencje. Niczego nie może zmieniać.',
+    livelli: 'Co będzie mogła robić', lettura: 'Tylko odczyt, na początek',
+    letturaDesc: 'Może odczytywać pojazdy, wydatki, terminy, dokumenty, profil i preferencje. Niczego nie zmienia, dopóki nie pozwolisz na to w aplikacji: w Ustawieniach → Połączone AI możesz pozwolić jej dodawać, zmieniać lub usuwać wydatki i terminy.',
     aggiunte: 'Odczyt i dodawanie', completo: 'Pełny dostęp', inArrivo: 'Wkrótce',
     privacy: 'To, co AI odczytuje, przechodzi także przez jej dostawcę (na przykład Anthropic dla Claude, OpenAI dla ChatGPT), zgodnie z zasadami tego dostawcy.',
     account: 'Konto:', collega: 'Połącz', annulla: 'Anuluj',
@@ -334,7 +335,7 @@ const TESTI = {
     sitoDiverso: 'Ta AI chce wrócić na inną stronę niż ta, którą połączyłeś: ze względów bezpieczeństwa nie kontynuuję. Odłącz ją w aplikacji i połącz ponownie.',
     nonControllato: 'Nie udało się sprawdzić Twoich połączeń: zacznij od nowa w swojej AI za chwilę.',
     eliminazione: 'Twoje konto jest w trakcie usuwania: nie można łączyć AI.',
-    troppi: 'Masz już połączonych 5 AI: odłącz jedną w Ustawienia → Połączone AI i spróbuj ponownie.',
+    troppi: 'Masz już połączonych 5 AI: odłącz jedną w Ustawieniach → Połączone AI i spróbuj ponownie.',
     nonCollegato: 'Nie udało się połączyć AI: spróbuj za chwilę.',
     nonCompletato: 'Nie udało się dokończyć połączenia: zacznij od nowa w swojej AI.',
     nonAnnullato: 'Nie udało się anulować połączenia: spróbuj za chwilę.',
@@ -351,13 +352,13 @@ const TESTI = {
     vuole: 'Η AI {nome} θέλει να συνδεθεί με τον λογαριασμό σου στο MotorSage.',
     sito: 'Θα συνδεθείς με:',
     soloSeTuo: 'Σύνδεσε μόνο αν ξεκίνησες εσύ τη σύνδεση, μόλις τώρα, από την εφαρμογή MotorSage ή από την AI σου.',
-    soloLettura: 'Το {nome} θα μπορεί μόνο να διαβάζει. Μπορείς να το αποσυνδέσεις όποτε θέλεις από Ρυθμίσεις → Συνδεδεμένες AI.',
+    soloLettura: 'Το {nome} προς το παρόν θα μπορεί μόνο να διαβάζει: αν θέλεις να προσθέτει ή να αλλάζει έξοδα και προθεσμίες, το αποφασίζεις εσύ από την εφαρμογή, στις Ρυθμίσεις → Συνδεδεμένες AI. Από εκεί μπορείς και να το αποσυνδέσεις όποτε θέλεις.',
     vuoleSenzaNome: 'Μια AI χωρίς όνομα θέλει να συνδεθεί με τον λογαριασμό σου στο MotorSage.',
-    soloLetturaSenzaNome: 'Θα μπορεί μόνο να διαβάζει. Μπορείς να την αποσυνδέσεις όποτε θέλεις από Ρυθμίσεις → Συνδεδεμένες AI.',
+    soloLetturaSenzaNome: 'Προς το παρόν θα μπορεί μόνο να διαβάζει: αν θέλεις να προσθέτει ή να αλλάζει έξοδα και προθεσμίες, το αποφασίζεις εσύ από την εφαρμογή, στις Ρυθμίσεις → Συνδεδεμένες AI. Από εκεί μπορείς και να την αποσυνδέσεις όποτε θέλεις.',
     passi: 'Βήματα',
     sconosciuto: 'Προσοχή: αυτός ο ιστότοπος δεν είναι ανάμεσα στις AI που γνωρίζουμε. Συνέχισε μόνο αν η σύνδεση ξεκίνησε από AI που εμπιστεύεσαι.',
-    livelli: 'Τι θα μπορεί να κάνει', lettura: 'Μόνο ανάγνωση',
-    letturaDesc: 'Μπορεί να διαβάζει οχήματα, έξοδα, προθεσμίες, έγγραφα, προφίλ και προτιμήσεις. Δεν μπορεί να αλλάξει τίποτα.',
+    livelli: 'Τι θα μπορεί να κάνει', lettura: 'Μόνο ανάγνωση, για αρχή',
+    letturaDesc: 'Μπορεί να διαβάζει οχήματα, έξοδα, προθεσμίες, έγγραφα, προφίλ και προτιμήσεις. Δεν αλλάζει τίποτα μέχρι να το επιτρέψεις εσύ από την εφαρμογή: στις Ρυθμίσεις → Συνδεδεμένες AI μπορείς να της επιτρέψεις να προσθέτει, να αλλάζει ή να διαγράφει έξοδα και προθεσμίες.',
     aggiunte: 'Ανάγνωση και προσθήκες', completo: 'Πλήρης', inArrivo: 'Σύντομα',
     privacy: 'Όσα διαβάζει η AI περνούν και από τον πάροχό της (για παράδειγμα Anthropic για το Claude, OpenAI για το ChatGPT), σύμφωνα με τους κανόνες του παρόχου.',
     account: 'Λογαριασμός:', collega: 'Σύνδεση', annulla: 'Ακύρωση',
