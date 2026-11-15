@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js 'sha256-ESjMNZEEhuP1+vqNs9a4G4RRllgVpnp5cP/8fQJ0Ghg='; style-src 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src https://bavuvoghfzleutkwwhxg.supabase.co; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js 'sha256-BPC7XqbeGgWp7iUZoEZcYR7qLa5iqM/IzMo8xZZt2NM='; style-src 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src https://bavuvoghfzleutkwwhxg.supabase.co; base-uri 'none'; form-action 'none'">
 <title>MotorSage · Collega la tua AI</title>
 <!--
   Pagina di consenso del server OAuth di Supabase: ci arriva chi aggiunge
@@ -399,13 +399,18 @@ const T = TESTI[LINGUA];
 // _shared/assistenti_noti.ts: solo per mostrare l'avviso prima di «Collega»;
 // il server ricalcola `noto` per conto suo.
 const RITORNI_NOTI = ['https://claude.ai/api/mcp/auth_callback', 'https://claude.com/api/mcp/auth_callback'];
-const HOST_NOTI = ['chatgpt.com', 'chat.openai.com', 'chat.mistral.ai'];
+const PERCORSI_NOTI = {
+  'chatgpt.com': /^\/(connector\/oauth\/[A-Za-z0-9_-]+|connector_platform_oauth_redirect|aip\/[A-Za-z0-9_-]+\/oauth\/callback)$/,
+  'chat.openai.com': /^\/aip\/[A-Za-z0-9_-]+\/oauth\/callback$/,
+};
 function sitoNoto(uri) {
   let u;
   try { u = new URL(uri); } catch { return false; }
   if (u.protocol !== 'https:' || u.username || u.password) return false;
   const host = u.hostname.toLowerCase().replace(/\.$/, '');
-  if (HOST_NOTI.includes(host)) return true;
+  // hasOwnProperty e non Object.hasOwn: Safari lo ha solo dalla 15.4.
+  const percorsi = Object.prototype.hasOwnProperty.call(PERCORSI_NOTI, host) ? PERCORSI_NOTI[host] : undefined;
+  if (percorsi) return !u.port && percorsi.test(u.pathname);
   return RITORNI_NOTI.includes('https://' + host + (u.port ? ':' + u.port : '') + u.pathname);
 }
 
