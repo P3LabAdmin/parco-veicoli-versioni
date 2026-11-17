@@ -130,7 +130,10 @@
       </div>
       <div class="scheda" id="scheda-ios" data-sistema="ios" hidden>
         <div class="testata"><h3 data-t="ios">iPhone e iPad</h3><span class="badge" data-t="tuo" hidden>il tuo dispositivo</span></div>
-        <p class="in-arrivo" data-t="inArrivo">In arrivo</p>
+        <p class="in-arrivo" data-t="betaIos">Beta in corso</p>
+        <!-- Il modulo (Termini, testi, privacy) sta sul portale p3lab.it: qui solo il collegamento,
+             nella lingua della pagina (l'indirizzo lo completa lo script). -->
+        <a class="pulsante" id="chiedi-iphone" href="https://p3lab.it/motorsage/#modulo-iphone" data-t="chiediIphone">Chiedi di provarla su iPhone</a>
       </div>
     </div>
     <p id="ripiego" class="ripiego stato" hidden>
@@ -172,7 +175,8 @@
       scaricaAndroid: 'Scarica per Android · {v}',
       scaricaMac: 'Scarica per Mac',
       ios: 'iPhone e iPad',
-      inArrivo: 'In arrivo',
+      betaIos: 'Beta in corso',
+      chiediIphone: 'Chiedi di provarla su iPhone',
       notaAndroid: 'Consenti l\'installazione da questa fonte. Se Play Protect avvisa, scegli «Installa comunque».',
       notaMac: 'Apri il file scaricato e trascina MotorSage in Applicazioni. Se il Mac la blocca alla prima apertura: Impostazioni di Sistema → Privacy e sicurezza → «Apri comunque».',
       qr: 'Vuoi l\'app sul telefono? Inquadra questo codice.',
@@ -191,7 +195,8 @@
       scaricaAndroid: 'Download for Android · {v}',
       scaricaMac: 'Download for Mac',
       ios: 'iPhone and iPad',
-      inArrivo: 'Coming soon',
+      betaIos: 'Now in beta',
+      chiediIphone: 'Ask to try it on iPhone',
       notaAndroid: 'Allow installation from this source. If Play Protect warns you, choose “Install anyway”.',
       notaMac: 'Open the downloaded file and drag MotorSage into Applications. If your Mac blocks it the first time you open it: System Settings → Privacy & Security → “Open Anyway”.',
       qr: 'Want the app on your phone? Scan this code.',
@@ -210,7 +215,8 @@
       scaricaAndroid: 'Für Android herunterladen · {v}',
       scaricaMac: 'Für Mac herunterladen',
       ios: 'iPhone und iPad',
-      inArrivo: 'Demnächst',
+      betaIos: 'Beta läuft',
+      chiediIphone: 'iPhone-Test anfragen',
       notaAndroid: 'Erlaube die Installation aus dieser Quelle. Wenn Play Protect warnt, wähle „Trotzdem installieren“.',
       notaMac: 'Öffne die heruntergeladene Datei und ziehe MotorSage in „Programme“. Wenn dein Mac die App beim ersten Öffnen blockiert: Systemeinstellungen → Datenschutz & Sicherheit → „Trotzdem öffnen“.',
       qr: 'Du möchtest die App auf dem Handy? Scanne diesen Code.',
@@ -229,7 +235,8 @@
       scaricaAndroid: 'Pobierz na Androida · {v}',
       scaricaMac: 'Pobierz na Maca',
       ios: 'iPhone i iPad',
-      inArrivo: 'Wkrótce',
+      betaIos: 'Trwa beta',
+      chiediIphone: 'Zgłoś się do testów na iPhonie',
       notaAndroid: 'Zezwól na instalację z tego źródła. Jeśli Play Protect ostrzeże, wybierz „Zainstaluj mimo to”.',
       notaMac: 'Otwórz pobrany plik i przeciągnij MotorSage do Programów. Jeśli Mac zablokuje aplikację przy pierwszym otwarciu: Ustawienia systemowe → Prywatność i ochrona → „Otwórz mimo to”.',
       qr: 'Chcesz mieć aplikację w telefonie? Zeskanuj ten kod.',
@@ -248,7 +255,8 @@
       scaricaAndroid: 'Λήψη για Android · {v}',
       scaricaMac: 'Λήψη για Mac',
       ios: 'iPhone και iPad',
-      inArrivo: 'Σύντομα',
+      betaIos: 'Beta σε εξέλιξη',
+      chiediIphone: 'Ζήτα να το δοκιμάσεις σε iPhone',
       notaAndroid: 'Επίτρεψε την εγκατάσταση από αυτήν την πηγή. Αν το Play Protect εμφανίσει προειδοποίηση, επίλεξε «Εγκατάσταση ούτως ή άλλως».',
       notaMac: 'Άνοιξε το αρχείο που κατέβασες και σύρε το MotorSage στις Εφαρμογές. Αν το Mac το μπλοκάρει στο πρώτο άνοιγμα: Ρυθμίσεις συστήματος → Απόρρητο και ασφάλεια → «Άνοιγμα οπωσδήποτε».',
       qr: 'Θέλεις την εφαρμογή στο κινητό; Σάρωσε αυτόν τον κωδικό.',
@@ -276,6 +284,9 @@
   const lingua = sceltaLingua();
   const t = TESTI[lingua];
   document.documentElement.lang = lingua;
+  // La richiesta per iPhone (TestFlight) sul portale, nella stessa lingua.
+  document.getElementById('chiedi-iphone').href =
+    'https://p3lab.it/' + (lingua === 'it' ? '' : lingua + '/') + 'motorsage/#modulo-iphone';
   document.title = t.titolo;
   for (const el of document.querySelectorAll('[data-t]')) {
     const testo = t[el.dataset.t];
