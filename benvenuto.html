@@ -163,7 +163,6 @@
 <script>
   const URL_RILASCIO = 'https://api.github.com/repos/P3LabAdmin/parco-veicoli-versioni/releases/latest';
 
-  // {v} è il numero di versione (se non si conosce, la parte « · {v}» cade).
   const TESTI = {
     it: {
       nonDisponibile: 'Questo file non è disponibile al momento.',
@@ -172,7 +171,7 @@
       passo1: 'Passo 1 · Scarica l\'app',
       cerco: 'Cerco l\'ultima versione…',
       tuo: 'il tuo dispositivo',
-      scaricaAndroid: 'Scarica per Android · {v}',
+      scaricaAndroid: 'Scarica per Android',
       scaricaMac: 'Scarica per Mac',
       ios: 'iPhone e iPad',
       betaIos: 'Beta in corso',
@@ -192,7 +191,7 @@
       passo1: 'Step 1 · Download the app',
       cerco: 'Looking for the latest version…',
       tuo: 'your device',
-      scaricaAndroid: 'Download for Android · {v}',
+      scaricaAndroid: 'Download for Android',
       scaricaMac: 'Download for Mac',
       ios: 'iPhone and iPad',
       betaIos: 'Now in beta',
@@ -212,7 +211,7 @@
       passo1: 'Schritt 1 · App herunterladen',
       cerco: 'Suche die neueste Version…',
       tuo: 'dein Gerät',
-      scaricaAndroid: 'Für Android herunterladen · {v}',
+      scaricaAndroid: 'Für Android herunterladen',
       scaricaMac: 'Für Mac herunterladen',
       ios: 'iPhone und iPad',
       betaIos: 'Beta läuft',
@@ -232,7 +231,7 @@
       passo1: 'Krok 1 · Pobierz aplikację',
       cerco: 'Szukam najnowszej wersji…',
       tuo: 'Twoje urządzenie',
-      scaricaAndroid: 'Pobierz na Androida · {v}',
+      scaricaAndroid: 'Pobierz na Androida',
       scaricaMac: 'Pobierz na Maca',
       ios: 'iPhone i iPad',
       betaIos: 'Trwa beta',
@@ -252,7 +251,7 @@
       passo1: 'Βήμα 1 · Κατέβασε την εφαρμογή',
       cerco: 'Αναζήτηση της τελευταίας έκδοσης…',
       tuo: 'η συσκευή σου',
-      scaricaAndroid: 'Λήψη για Android · {v}',
+      scaricaAndroid: 'Λήψη για Android',
       scaricaMac: 'Λήψη για Mac',
       ios: 'iPhone και iPad',
       betaIos: 'Beta σε εξέλιξη',
@@ -290,7 +289,7 @@
   document.title = t.titolo;
   for (const el of document.querySelectorAll('[data-t]')) {
     const testo = t[el.dataset.t];
-    if (testo !== undefined) el.textContent = testo.replace(' · {v}', '');
+    if (testo !== undefined) el.textContent = testo;
   }
 
   // Dispositivo: android, mac, ios o altro (un computer qualunque).
@@ -303,12 +302,6 @@
     return 'altro';
   }
   const dispositivo = sceltaDispositivo();
-
-  // «v1.8.1-b20» → «1.8.1»: il numero senza la v e senza il numero di build.
-  function versioneDaTag(tag) {
-    const m = /^v?(\d+(?:\.\d+)*)/.exec(String(tag || ''));
-    return m ? m[1] : '';
-  }
 
   // Cerca il file per estensione, non per nome: i nomi sono cambiati
   // (parco-veicoli-… prima, motorsage-… ora).
@@ -336,7 +329,7 @@
   // evidenza. Ogni download compare solo se il suo file esiste; se manca, la
   // scheda lo dice e rimanda alla pagina delle versioni. Con download=false
   // (GitHub non risponde o nessun file) restano solo iPhone e iPad.
-  function mostraSchede(apk, mac, versione, download) {
+  function mostraSchede(apk, mac, download) {
     const ordine = ['android', 'mac', 'ios'];
     if (ordine.includes(dispositivo)) {
       ordine.splice(ordine.indexOf(dispositivo), 1);
@@ -359,11 +352,9 @@
     }
     imposta('android', apk);
     imposta('mac', mac);
-    const bAndroid = document.getElementById('scarica-android');
-    bAndroid.href = apk || '#';
-    bAndroid.textContent = versione
-      ? t.scaricaAndroid.replace('{v}', versione)
-      : t.scaricaAndroid.replace(' · {v}', '');
+    // Nessun numero di versione: «latest» è l'ultima definitiva, mentre chi
+    // ha l'app riceve poi le beta (17/11/2026), e Mac e iPhone non ne hanno.
+    document.getElementById('scarica-android').href = apk || '#';
     document.getElementById('scarica-mac').href = mac || '#';
     document.getElementById('stato').hidden = true;
     document.getElementById('ripiego').hidden = download;
@@ -382,10 +373,10 @@
       const rilascio = await risposta.json();
       const apk = trovaFile(rilascio.assets, /\.apk$/i);
       const mac = trovaFile(rilascio.assets, /macos.*\.zip$/i);
-      mostraSchede(apk, mac, versioneDaTag(rilascio.tag_name), !!(apk || mac));
+      mostraSchede(apk, mac, !!(apk || mac));
     } catch (e) {
       // GitHub non risponde: collegamento alla pagina delle versioni.
-      mostraSchede('', '', '', false);
+      mostraSchede('', '', false);
     } finally {
       clearTimeout(scadenza);
     }
