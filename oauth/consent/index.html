@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js 'sha256-nTzyhzTXPg0yc2wrBBmonpFtAq6ZAhObwucWdJcXCO8='; style-src 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src https://bavuvoghfzleutkwwhxg.supabase.co; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js 'sha256-8WZlNCyjsSM5vK09dScFOplNO+1s6GVBygVAJ0ZjTwA='; style-src 'unsafe-inline'; img-src 'self'; font-src 'self'; connect-src https://bavuvoghfzleutkwwhxg.supabase.co; base-uri 'none'; form-action 'none'">
 <title>MotorSage · Collega la tua AI</title>
 <!--
   Pagina di consenso del server OAuth di Supabase: ci arriva chi aggiunge
@@ -428,17 +428,18 @@ function nomePulito(nome) {
   return Array.from(pulito).slice(0, 40).join('').trim();
 }
 
-// _shared/collegamento.ts, sitoDelRimando e rimandoGiaApprovato: col
-// consenso già dato si torna solo a un sito dei collegamenti vivi (NV2).
-function sitoDelRimando(uri) {
+// _shared/collegamento.ts, rimandoEsatto e rimandoGiaApprovato: col
+// consenso già dato si torna solo all'indirizzo esatto di un collegamento
+// vivo (NV2, NV4): sullo stesso sito possono stare indirizzi di altri.
+function rimandoEsatto(uri) {
   let u;
   try { u = new URL(uri); } catch { return null; }
   if (!u.host) return null;
-  return u.protocol === 'https:' || u.protocol === 'http:' ? u.origin : u.protocol + '//' + u.host;
+  return u.protocol + '//' + u.host + u.pathname;
 }
-function rimandoGiaApprovato(redirectUrl, sitiCollegati) {
-  const sito = sitoDelRimando(redirectUrl);
-  return sito !== null && sitiCollegati.includes(sito);
+function rimandoGiaApprovato(redirectUrl, rimandiCollegati) {
+  const rimando = rimandoEsatto(redirectUrl);
+  return rimando !== null && rimandiCollegati.includes(rimando);
 }
 
 // _shared/collegamento.ts, clientDaRevocare: i consensi senza riga di
@@ -609,12 +610,13 @@ $('modulo-codice').addEventListener('submit', async (evento) => {
 // non rimanda più i dettagli: il collegamento non passerebbe da
 // collega-assistente. Prima di tornare all'AI si revocano i consensi
 // senza collegamento (scollegati dall'app) o scaduti (90 giorni), con la
-// sessione della persona. Restituisce quanti ne ha revocati e i siti dei
-// collegamenti rimasti; lancia se non riesce a controllare.
+// sessione della persona. Restituisce quanti ne ha revocati e gli indirizzi
+// esatti dei collegamenti rimasti (quelli di prima della 0064 senza
+// indirizzo non valgono); lancia se non riesce a controllare.
 async function ripulisciConsensi() {
   const grants = await db.auth.oauth.listGrants();
   if (grants.error) throw grants.error;
-  const righe = await db.from('collegamenti_assistenti').select('client_id, ultimo_uso, creato_il, sito_rimando');
+  const righe = await db.from('collegamenti_assistenti').select('client_id, ultimo_uso, creato_il, rimando');
   if (righe.error) throw righe.error;
   const da = clientDaRevocare(
     (grants.data || []).map((g) => ({ clientId: g.client.id })),
@@ -626,10 +628,10 @@ async function ripulisciConsensi() {
     if (esito.error) throw esito.error;
   }
   const revocati = new Set(da);
-  const siti = (righe.data || [])
-    .filter((r) => !revocati.has(r.client_id))
-    .map((r) => r.sito_rimando);
-  return { revocati: da.length, siti };
+  const rimandi = (righe.data || [])
+    .filter((r) => !revocati.has(r.client_id) && r.rimando)
+    .map((r) => r.rimando);
+  return { revocati: da.length, rimandi };
 }
 
 async function caricaDettagli() {
@@ -644,9 +646,9 @@ async function caricaDettagli() {
   }
   if (!data.authorization_id) {
     let revocati;
-    let siti;
+    let rimandi;
     try {
-      ({ revocati, siti } = await ripulisciConsensi());
+      ({ revocati, rimandi } = await ripulisciConsensi());
     } catch (e) {
       console.error('consensi', e && e.status, e && e.code);
       mostra(null);
@@ -660,7 +662,7 @@ async function caricaDettagli() {
       await chiudiSessione();
       return;
     }
-    if (!rimandoGiaApprovato(data.redirect_url, siti)) {
+    if (!rimandoGiaApprovato(data.redirect_url, rimandi)) {
       console.error('rimando a un sito non collegato');
       messaggio(T.sitoDiverso, true);
       await chiudiSessione();
