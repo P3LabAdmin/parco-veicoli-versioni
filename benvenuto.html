@@ -134,6 +134,8 @@
         <!-- Il modulo (Termini, testi, privacy) sta sul portale p3lab.it: qui solo il collegamento,
              nella lingua della pagina (l'indirizzo lo completa lo script). -->
         <a class="pulsante" id="chiedi-iphone" href="https://p3lab.it/motorsage/#modulo-iphone" data-t="chiediIphone">Chiedi di provarla su iPhone</a>
+        <!-- Compare solo quando LINK_TESTFLIGHT ha un indirizzo (lo script la riempie). -->
+        <p class="nota" id="nota-testflight" hidden></p>
       </div>
     </div>
     <p id="ripiego" class="ripiego stato" hidden>
@@ -161,6 +163,11 @@
         integrity="sha384-8FWZA6BGMXhsfO+BLtrJK0We6gg5o1JyO8xQm6peWDEUs17ACA5ziE/NIAkl9z2k"
         crossorigin="anonymous"></script>
 <script>
+  // Link pubblico di TestFlight per iPhone. Finché è vuoto la scheda iPhone
+  // resta com'era (richiesta sul portale); con un indirizzo il pulsante porta
+  // a TestFlight e compare la spiegazione sull'invito da chiedere dall'app.
+  const LINK_TESTFLIGHT = 'https://testflight.apple.com/join/26E3F4c4';
+
   const URL_RILASCIO = 'https://api.github.com/repos/P3LabAdmin/parco-veicoli-versioni/releases/latest';
 
   const TESTI = {
@@ -176,6 +183,8 @@
       ios: 'iPhone e iPad',
       betaIos: 'Beta in corso',
       chiediIphone: 'Chiedi di provarla su iPhone',
+      testflightPulsante: 'Installa con TestFlight',
+      testflightNota: 'Dopo l\'installazione, apri MotorSage e chiedi l\'invito dall\'app: l\'accesso resta su invito, e te lo mandiamo noi. Serve TestFlight, l\'app di Apple per le prove.',
       notaAndroid: 'Consenti l\'installazione da questa fonte. Se Play Protect avvisa, scegli «Installa comunque».',
       notaMac: 'Apri il file scaricato e trascina MotorSage in Applicazioni. Se il Mac la blocca alla prima apertura: Impostazioni di Sistema → Privacy e sicurezza → «Apri comunque».',
       qr: 'Vuoi l\'app sul telefono? Inquadra questo codice.',
@@ -196,6 +205,8 @@
       ios: 'iPhone and iPad',
       betaIos: 'Now in beta',
       chiediIphone: 'Ask to try it on iPhone',
+      testflightPulsante: 'Install with TestFlight',
+      testflightNota: 'After installing, open MotorSage and request the invitation from the app: access is by invitation only, and we will send it to you. You need TestFlight, Apple\'s app for beta testing.',
       notaAndroid: 'Allow installation from this source. If Play Protect warns you, choose “Install anyway”.',
       notaMac: 'Open the downloaded file and drag MotorSage into Applications. If your Mac blocks it the first time you open it: System Settings → Privacy & Security → “Open Anyway”.',
       qr: 'Want the app on your phone? Scan this code.',
@@ -216,6 +227,8 @@
       ios: 'iPhone und iPad',
       betaIos: 'Beta läuft',
       chiediIphone: 'iPhone-Test anfragen',
+      testflightPulsante: 'Mit TestFlight installieren',
+      testflightNota: 'Öffne MotorSage nach der Installation und fordere die Einladung in der App an: Der Zugang bleibt auf Einladung, wir schicken sie dir. Du brauchst TestFlight, die Test-App von Apple.',
       notaAndroid: 'Erlaube die Installation aus dieser Quelle. Wenn Play Protect warnt, wähle „Trotzdem installieren“.',
       notaMac: 'Öffne die heruntergeladene Datei und ziehe MotorSage in „Programme“. Wenn dein Mac die App beim ersten Öffnen blockiert: Systemeinstellungen → Datenschutz & Sicherheit → „Trotzdem öffnen“.',
       qr: 'Du möchtest die App auf dem Handy? Scanne diesen Code.',
@@ -236,6 +249,8 @@
       ios: 'iPhone i iPad',
       betaIos: 'Trwa beta',
       chiediIphone: 'Zgłoś się do testów na iPhonie',
+      testflightPulsante: 'Zainstaluj przez TestFlight',
+      testflightNota: 'Po instalacji otwórz MotorSage i poproś o zaproszenie w aplikacji: dostęp pozostaje na zaproszenie, a my Ci je wyślemy. Potrzebujesz TestFlight, aplikacji Apple do testów.',
       notaAndroid: 'Zezwól na instalację z tego źródła. Jeśli Play Protect ostrzeże, wybierz „Zainstaluj mimo to”.',
       notaMac: 'Otwórz pobrany plik i przeciągnij MotorSage do Programów. Jeśli Mac zablokuje aplikację przy pierwszym otwarciu: Ustawienia systemowe → Prywatność i ochrona → „Otwórz mimo to”.',
       qr: 'Chcesz mieć aplikację w telefonie? Zeskanuj ten kod.',
@@ -256,6 +271,8 @@
       ios: 'iPhone και iPad',
       betaIos: 'Beta σε εξέλιξη',
       chiediIphone: 'Ζήτα να το δοκιμάσεις σε iPhone',
+      testflightPulsante: 'Εγκατάσταση με το TestFlight',
+      testflightNota: 'Μετά την εγκατάσταση, άνοιξε το MotorSage και ζήτα την πρόσκληση από την εφαρμογή: η πρόσβαση γίνεται μόνο με πρόσκληση και θα σου την στείλουμε εμείς. Χρειάζεσαι το TestFlight, την εφαρμογή δοκιμών της Apple.',
       notaAndroid: 'Επίτρεψε την εγκατάσταση από αυτήν την πηγή. Αν το Play Protect εμφανίσει προειδοποίηση, επίλεξε «Εγκατάσταση ούτως ή άλλως».',
       notaMac: 'Άνοιξε το αρχείο που κατέβασες και σύρε το MotorSage στις Εφαρμογές. Αν το Mac το μπλοκάρει στο πρώτο άνοιγμα: Ρυθμίσεις συστήματος → Απόρρητο και ασφάλεια → «Άνοιγμα οπωσδήποτε».',
       qr: 'Θέλεις την εφαρμογή στο κινητό; Σάρωσε αυτόν τον κωδικό.',
@@ -290,6 +307,15 @@
   for (const el of document.querySelectorAll('[data-t]')) {
     const testo = t[el.dataset.t];
     if (testo !== undefined) el.textContent = testo;
+  }
+  // Con il link pubblico: pulsante verso TestFlight e spiegazione dell'invito.
+  if (LINK_TESTFLIGHT) {
+    const pulsanteIphone = document.getElementById('chiedi-iphone');
+    pulsanteIphone.href = LINK_TESTFLIGHT;
+    pulsanteIphone.textContent = t.testflightPulsante;
+    const notaTestflight = document.getElementById('nota-testflight');
+    notaTestflight.textContent = t.testflightNota;
+    notaTestflight.hidden = false;
   }
 
   // Dispositivo: android, mac, ios o altro (un computer qualunque).
